@@ -9,14 +9,41 @@ import SwiftUI
 
 struct MainTabView: View {
     
+    @Environment(\.modelContext) var modelContext
+    @State var viewModel = MainTabViewModel()
+    
     var body: some View {
-        NavigationStack {
-            TabView {
-                Tab(content: {ScoresView()}, label: {Label("Scores", systemImage: "chart.bar.xaxis")})
-                Tab(content: {LeaderboardView()}, label: {Label("Leaderboard", systemImage: "trophy")})
-                Tab(content: {InfoView()}, label: {Label("Info", systemImage: "info.circle")})
-                Tab(content: {MainSettingsView()}, label: {Label("Settings", systemImage: "gearshape")})
+        Group {
+            NavigationStack {
+                TabView (selection: $viewModel.selection){
+                    Tab(value: 0, content: {ScoresView()}, label: {Label("Scores", systemImage: "chart.bar.xaxis")})
+                    Tab(value: 1, content: {LeaderboardView()}, label: {Label("Leaderboard", systemImage: "trophy")})
+                    Tab(value: 2, content: {InfoView()}, label: {Label("Info", systemImage: "info.circle")})
+                    Tab(value: 3, content: {MainSettingsView()}, label: {Label("Settings", systemImage: "gearshape")})
+                }
+                .navigationDestination(isPresented: $viewModel.showScoresheet, destination: {ScoresheetView()})
+                .toolbar {
+                    if viewModel.selection == 0 {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            EditButton()
+                        }
+                        ToolbarItem {
+                         Button(action: addItem) {
+                         Label("Add Item", systemImage: "plus")
+                            }
+                        }
+                    }
+                }
             }
+        }
+        .environment(viewModel)
+    }
+    
+    private func addItem() {
+        withAnimation {
+            let newItem = Item(timestamp: Date())
+            modelContext.insert(newItem)
+            viewModel.showScoresheet = true
         }
     }
 }

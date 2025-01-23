@@ -13,7 +13,6 @@ struct CameraView: View {
     
     var body: some View {
         FrameView(image: model.frame)
-            .ignoresSafeArea()
     }
 }
 

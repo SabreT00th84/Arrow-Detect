@@ -7,7 +7,9 @@
 
 import Foundation
 
-class ScoresViewModel: ObservableObject {
-    @Published var showScoresheet = false
+@Observable
+class MainTabViewModel: ObservableObject {
+    var showScoresheet = false
+    var selection = 0
     
 }
