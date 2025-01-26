@@ -8,26 +8,34 @@
 import SwiftUI
 
 struct ScoresheetView: View {
-    @StateObject var viewModel =  ScoresheetViewModel()
+    @State var viewModel =  ScoresheetViewModel()
+    @State var showCamera = false
     
     var body: some View {
         Form {
             ForEach (0..<5) { endIndex in
                 Section ("End \(endIndex + 1)") {
-                    HStack {
-                        ForEach (0..<3) { arrowIndex in
-                            TextField("Arrow \(arrowIndex + 1)", text: $viewModel.scores[endIndex][arrowIndex])
-                        }
-                    }
+                    arrowsView(endIndex: endIndex)
                     button
                 }
             }
         }
+        .fullScreenCover(isPresented: $showCamera) {CameraView()}
     }
     
+    @ViewBuilder
+    func arrowsView(endIndex: Int) -> some View{
+        HStack {
+            ForEach (0..<3) { arrowIndex in
+                TextField("Arrow \(arrowIndex + 1)", text: $viewModel.scores[endIndex][arrowIndex])
+            }
+        }
+    }
+    
+    @ViewBuilder
     var button: some View {
-        NavigationLink(destination: CameraView()) {
-            Label("Scan", systemImage: "camera.viewfinder")
+        Button("Scan", systemImage: "camera.viewfinder") {
+            showCamera = true
         }
     }
 }
