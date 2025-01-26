@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AVFoundation
 
 extension Encodable {
     func asDictionary() -> [String: Any] {

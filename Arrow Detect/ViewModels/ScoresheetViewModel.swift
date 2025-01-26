@@ -9,10 +9,11 @@ import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 
-class ScoresheetViewModel: ObservableObject {
-    @Published var archer = Archer(id: "", userId: "", instructorId: "")
-    @Published var scores:[[String]] = Array(repeating: Array(repeating: "", count: 3), count: 5)
-    @Published var errorMessage = ""
+@Observable
+class ScoresheetViewModel {
+    var archer = Archer(id: "", userId: "", instructorId: "")
+    var scores:[[String]] = Array(repeating: Array(repeating: "", count: 3), count: 5)
+    var errorMessage = ""
     
     func loadData() async {
         guard let userID = Auth.auth().currentUser?.uid else {
