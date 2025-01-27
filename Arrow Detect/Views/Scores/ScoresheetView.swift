@@ -9,7 +9,7 @@ import SwiftUI
 
 struct ScoresheetView: View {
     @State var viewModel =  ScoresheetViewModel()
-    @State var showCamera = false
+    @State var camera = CameraViewModel()
     
     var body: some View {
         Form {
@@ -20,7 +20,13 @@ struct ScoresheetView: View {
                 }
             }
         }
-        .fullScreenCover(isPresented: $showCamera) {CameraView()}
+        .fullScreenCover(isPresented: $viewModel.showCameraView) {
+            if let image = camera.image {
+                ImageDisplayView(image: image)
+            } else {
+                CameraView(viewModel: $camera)
+            }
+        }
     }
     
     @ViewBuilder
@@ -35,7 +41,7 @@ struct ScoresheetView: View {
     @ViewBuilder
     var button: some View {
         Button("Scan", systemImage: "camera.viewfinder") {
-            showCamera = true
+            viewModel.showCameraView = true
         }
     }
 }

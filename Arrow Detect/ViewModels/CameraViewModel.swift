@@ -6,28 +6,38 @@
 //
 
 import Foundation
+import PhotosUI
+import SwiftUI
 import AVFoundation
 
-class CameraDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
+    
+    var imageData: Data?
+    
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error {
             print("Error processing photo: \(error.localizedDescription)")
             return
-        }
-        
-        Task {
-            await save(photo: photo)
+        } else {
+            guard let photoData = photo.fileDataRepresentation() else {
+                print("No photo data.")
+                return
+            }
+            imageData = photoData
         }
     }
 }
-
 
 @Observable
 class CameraViewModel {
     
     let captureSession = AVCaptureSession()
     let photoOutput = AVCapturePhotoOutput()
-    private var cameraDelegate: CameraDelegate?
+    var imageItem: PhotosPickerItem?
+    var photoData: Data?
+    var image: CGImage?
+    var showImage = false
+
     var isAuthorized: Bool {
         get async {
             let status = AVCaptureDevice.authorizationStatus(for: .video)
@@ -51,8 +61,8 @@ class CameraViewModel {
     
     private func setupCaptureSession () {
         captureSession.beginConfiguration()
-        let videoDevice = AVCaptureDevice.default(for: .video)
-        guard let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice!), captureSession.canAddInput(videoDeviceInput) else { return }
+        guard let videoDevice = AVCaptureDevice.default(for: .video) else { return }
+        guard let videoDeviceInput = try? AVCaptureDeviceInput(device: videoDevice), captureSession.canAddInput(videoDeviceInput) else { return }
         if captureSession.inputs.isEmpty {
             captureSession.addInput(videoDeviceInput)
         }
@@ -63,14 +73,32 @@ class CameraViewModel {
     }
     
     func startCapture () async {
-        guard await isAuthorized else { return }
+        guard await isAuthorized,
+        captureSession.isRunning == false,
+        captureSession.inputs.count > 0
+        else { return }
             captureSession.startRunning()
     }
     
     func capturePhoto () {
         var photoSettings = AVCapturePhotoSettings()
+        if photoOutput.availablePhotoCodecTypes.contains(.hevc) {
+            photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
+        }
         photoSettings.photoQualityPrioritization = .balanced
-        //guard let imageData = photoOutput.capturePhoto(with: <#T##AVCapturePhotoSettings#>, delegate: <#T##any AVCapturePhotoCaptureDelegate#>) else { return }
+        let delegate = PhotoCaptureDelegate()
+        photoOutput.capturePhoto(with: photoSettings, delegate: delegate)
+        guard let data = delegate.imageData else { return }
+        image = convertImage(data: data)
+        showImage = true
+    }
+    
+    func convertImage(data: Data) -> CGImage? {
+        guard let provider = CGDataProvider(data: data as CFData),
+              let image = CGImage(pngDataProviderSource: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent) else {
+            print("Could not create CGImage")
+            return nil}
+        return image
     }
     
     func stopCapture () {

@@ -14,6 +14,8 @@ class ScoresheetViewModel {
     var archer = Archer(id: "", userId: "", instructorId: "")
     var scores:[[String]] = Array(repeating: Array(repeating: "", count: 3), count: 5)
     var errorMessage = ""
+    var showCameraView = false
+    var showImageView = false
     
     func loadData() async {
         guard let userID = Auth.auth().currentUser?.uid else {
