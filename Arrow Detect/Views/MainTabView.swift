@@ -6,11 +6,13 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct MainTabView: View {
     
     @Environment(\.modelContext) var modelContext
     @State var viewModel = MainTabViewModel()
+    @Query private var items: [Score]
     
     var body: some View {
         Group {
@@ -41,9 +43,17 @@ struct MainTabView: View {
     
     private func addItem() {
         withAnimation {
-            let newItem = Item(timestamp: Date())
+            let newItem = Score(timestamp: Date())
             modelContext.insert(newItem)
             viewModel.showScoresheet = true
+        }
+    }
+    
+    private func deleteItems(offsets: IndexSet) {
+        withAnimation {
+            for index in offsets {
+                modelContext.delete(items[index])
+            }
         }
     }
 }

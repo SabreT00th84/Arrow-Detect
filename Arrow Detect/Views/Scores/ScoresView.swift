@@ -11,7 +11,7 @@ import SwiftData
 struct ScoresView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(MainTabViewModel.self) var viewModel
-    @Query private var items: [Item]
+    @Query private var items: [Score]
     var body: some View {
         List {
             ForEach(items) { item in
@@ -36,5 +36,5 @@ struct ScoresView: View {
 
 #Preview {
     ScoresView()
-        .modelContainer(for: Item.self, inMemory: true)
+        .modelContainer(for: Score.self, inMemory: true)
 }
