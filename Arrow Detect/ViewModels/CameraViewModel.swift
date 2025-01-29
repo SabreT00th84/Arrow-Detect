@@ -12,18 +12,21 @@ import AVFoundation
 
 class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     
-
+    let completion: (Result<Data, Error>) -> Void
+    
+    init(completion: @escaping (Result<Data, Error>) -> Void) {
+        self.completion = completion
+    }
     
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error {
             print("Error processing photo: \(error.localizedDescription)")
+            completion(.failure(error))
             return
+        } else if let photoData = photo.fileDataRepresentation() {
+            completion(.success(photoData))
         } else {
-            guard let photoData = photo.fileDataRepresentation() else {
-                print("No photo data.")
-                return
-            }
-            imageData = photoData
+            completion(.failure(NSError(domain: "photoOutput()", code: -1, userInfo: ["localizedDescription": "Could not get image data"])))
         }
     }
 }
@@ -36,8 +39,8 @@ class CameraViewModel {
     var imageItem: PhotosPickerItem?
     var photoData: Data?
     var image: CGImage?
-    var showImage = false
-    private var delegate = PhotoCaptureDelegate()
+    
+    private var delegate: PhotoCaptureDelegate?
 
     var isAuthorized: Bool {
         get async {
@@ -73,6 +76,7 @@ class CameraViewModel {
         captureSession.commitConfiguration()
     }
     
+    @CameraActor
     func startCapture () async {
         guard await isAuthorized,
         captureSession.isRunning == false,
@@ -81,26 +85,47 @@ class CameraViewModel {
             captureSession.startRunning()
     }
     
-    @MainActor
-    func capturePhoto () {
+    @CameraActor
+    func captureImage () async throws -> Data {
         var photoSettings = AVCapturePhotoSettings()
-        if photoOutput.availablePhotoCodecTypes.contains(.hevc) {
-            photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
+        if photoOutput.availablePhotoCodecTypes.contains(.jpeg) {
+            photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.jpeg])
         }
         photoSettings.photoQualityPrioritization = .balanced
-        photoOutput.capturePhoto(with: photoSettings, delegate: delegate)
-        guard let data = delegate.imageData else {
-            print("could not get image data from delegate")
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            let delegate = PhotoCaptureDelegate { result in
+                switch result {
+                case .success(let data):
+                    continuation.resume(returning: data)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+            self.delegate = delegate
+            photoOutput.capturePhoto(with: photoSettings, delegate: delegate)
+        }
+    }
+    
+    @CameraActor
+    func getImage () async {
+        do {
+            photoData = try await captureImage()
+            delegate = nil
+            guard let data = photoData else {
+                print("no data")
+                return
+            }
+            image = convertImage(data: data)
+        } catch let error {
+            print(error)
             return
         }
-        image = convertImage(data: data)
-        stopCapture()
-        showImage = true
     }
     
     func convertImage(data: Data) -> CGImage? {
         guard let provider = CGDataProvider(data: data as CFData),
-              let image = CGImage(pngDataProviderSource: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent) else {
+              let image = CGImage(jpegDataProviderSource: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent) else {
             print("Could not create CGImage")
             return nil}
         return image

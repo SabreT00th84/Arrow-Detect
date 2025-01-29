@@ -21,8 +21,7 @@ struct ScoresheetView: View {
             }
         }
         .fullScreenCover(isPresented: $viewModel.showCameraView) {
-            @State var showImage = camera
-            if let image = camera.image, camera.showImage {
+            if let image = camera.image {
                 ImageDisplayView(image: image)
             } else {
                 CameraView(viewModel: $camera)

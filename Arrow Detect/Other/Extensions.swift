@@ -21,3 +21,7 @@ extension Encodable {
         }
     }
 }
+
+@globalActor actor CameraActor: GlobalActor {
+    static let shared = CameraActor()
+}
