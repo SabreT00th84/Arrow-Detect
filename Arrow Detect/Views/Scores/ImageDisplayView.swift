@@ -18,16 +18,15 @@ struct ImageDisplayView: View {
                 .scaledToFit()
                 .ignoresSafeArea()
             Button("Score") {
-                DispatchQueue.global().async {
-                    Task {
-                        await scoreImage()
-                    }
+                Task {
+                    await scoreImage()
                 }
             }
             .buttonStyle(.borderedProminent)
-            .controlSize(.large)
+            .controlSize(.regular)
         }
     }
+    
     
     func scoreImage () async -> Arrow {
         return Arrow(arrowId: "", endId: "", x: 0, y: 0, score: 0)

@@ -12,7 +12,7 @@ import AVFoundation
 
 class PhotoCaptureDelegate: NSObject, AVCapturePhotoCaptureDelegate {
     
-    var imageData: Data?
+
     
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
         if let error {
@@ -37,6 +37,7 @@ class CameraViewModel {
     var photoData: Data?
     var image: CGImage?
     var showImage = false
+    private var delegate = PhotoCaptureDelegate()
 
     var isAuthorized: Bool {
         get async {
@@ -80,16 +81,20 @@ class CameraViewModel {
             captureSession.startRunning()
     }
     
+    @MainActor
     func capturePhoto () {
         var photoSettings = AVCapturePhotoSettings()
         if photoOutput.availablePhotoCodecTypes.contains(.hevc) {
             photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
         }
         photoSettings.photoQualityPrioritization = .balanced
-        let delegate = PhotoCaptureDelegate()
         photoOutput.capturePhoto(with: photoSettings, delegate: delegate)
-        guard let data = delegate.imageData else { return }
+        guard let data = delegate.imageData else {
+            print("could not get image data from delegate")
+            return
+        }
         image = convertImage(data: data)
+        stopCapture()
         showImage = true
     }
     
