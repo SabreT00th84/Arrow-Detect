@@ -15,15 +15,15 @@ struct ImageDisplayView: View {
         ZStack (alignment: .bottom) {
             Image(image, scale: 1, label: Text("Target Image"))
                 .resizable()
-                .scaledToFit()
-                .ignoresSafeArea()
+                .scaledToFill()
+                .rotationEffect(Angle(degrees: 90))
             Button("Score") {
                 Task {
                     await scoreImage()
                 }
             }
             .buttonStyle(.borderedProminent)
-            .controlSize(.regular)
+            .padding()
         }
     }
     

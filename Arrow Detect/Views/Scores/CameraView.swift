@@ -63,11 +63,14 @@ struct CameraView: View {
                                 guard let data = viewModel.photoData,
                                       let provider = CGDataProvider(data: data as CFData) else { return }
                                 viewModel.image = CGImage(pngDataProviderSource: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
-                                viewModel.showImage = true
                             }
                         }
                     Spacer()
-                    Button(action: {viewModel.capturePhoto()}) {
+                    Button() {
+                        Task {
+                            await viewModel.getImage()
+                        }
+                    } label: {
                         Circle()
                             .foregroundStyle(Color.white)
                             .frame(width: 70, height: 70, alignment: .center)

@@ -26,9 +26,6 @@ struct MainTabView: View {
                 .navigationDestination(isPresented: $viewModel.showScoresheet, destination: {ScoresheetView()})
                 .toolbar {
                     if viewModel.selection == 0 {
-                        ToolbarItem(placement: .navigationBarTrailing) {
-                            EditButton()
-                        }
                         ToolbarItem {
                          Button(action: addItem) {
                          Label("Add Item", systemImage: "plus")
