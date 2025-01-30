@@ -18,24 +18,18 @@ struct ImageDisplayView: View {
                 Image(cgImage, scale: 1, label: Text("Target Image"))
                     .resizable()
                     .scaledToFill()
-                    .rotationEffect(Angle(degrees: 90))
                 Button("Score") {
-                    Task {
-                        await scoreImage()
-                    }
+                    viewModel.cropToTarget()
                 }
                 .buttonStyle(.borderedProminent)
                 .padding()
             }
         }
-        .task {
-            viewModel = ImageDisplayViewModel(image: image)
-        }
     }
     
-    
-    func scoreImage () async -> Arrow {
-        return Arrow(arrowId: "", endId: "", x: 0, y: 0, score: 0)
+    init (image: CIImage) {
+        self.image = image
+        self.viewModel = ImageDisplayViewModel(image: image)
     }
 }
 
