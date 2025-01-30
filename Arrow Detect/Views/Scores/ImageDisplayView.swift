@@ -9,21 +9,27 @@ import SwiftUI
 
 struct ImageDisplayView: View {
     
-    let image: CGImage
+    let image: CIImage
+    @State var viewModel: ImageDisplayViewModel
     
     var body: some View {
         ZStack (alignment: .bottom) {
-            Image(image, scale: 1, label: Text("Target Image"))
-                .resizable()
-                .scaledToFill()
-                .rotationEffect(Angle(degrees: 90))
-            Button("Score") {
-                Task {
-                    await scoreImage()
+            if let cgImage = CIContext().createCGImage(viewModel.image, from: viewModel.image.extent) {
+                Image(cgImage, scale: 1, label: Text("Target Image"))
+                    .resizable()
+                    .scaledToFill()
+                    .rotationEffect(Angle(degrees: 90))
+                Button("Score") {
+                    Task {
+                        await scoreImage()
+                    }
                 }
+                .buttonStyle(.borderedProminent)
+                .padding()
             }
-            .buttonStyle(.borderedProminent)
-            .padding()
+        }
+        .task {
+            viewModel = ImageDisplayViewModel(image: image)
         }
     }
     

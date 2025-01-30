@@ -38,7 +38,7 @@ class CameraViewModel {
     let photoOutput = AVCapturePhotoOutput()
     var imageItem: PhotosPickerItem?
     var photoData: Data?
-    var image: CGImage?
+    var image: CIImage?
     
     private var delegate: PhotoCaptureDelegate?
 
@@ -123,12 +123,12 @@ class CameraViewModel {
         }
     }
     
-    func convertImage(data: Data) -> CGImage? {
-        guard let provider = CGDataProvider(data: data as CFData),
-              let image = CGImage(jpegDataProviderSource: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent) else {
-            print("Could not create CGImage")
-            return nil}
-        return image
+    func convertImage(data: Data) -> CIImage? {
+        guard let ciImage = CIImage(data: data) else {
+            print("Could not create CIImage")
+            return nil
+        }
+        return ciImage.oriented(.right)
     }
     
     func stopCapture () {
