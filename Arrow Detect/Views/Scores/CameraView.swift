@@ -61,8 +61,11 @@ struct CameraView: View {
                             Task {
                                 viewModel.photoData = try? await viewModel.imageItem?.loadTransferable(type: Data.self)
                                 guard let data = viewModel.photoData,
-                                      let provider = CGDataProvider(data: data as CFData) else { return }
-                                viewModel.image = CGImage(pngDataProviderSource: provider, decode: nil, shouldInterpolate: true, intent: .defaultIntent)
+                                      let ciImage = CIImage(data: data) else {
+                                    print("Could not create ciImage from photoPicker")
+                                    return
+                                }
+                                viewModel.image = ciImage
                             }
                         }
                     Spacer()
