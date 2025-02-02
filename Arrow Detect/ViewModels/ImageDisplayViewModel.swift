@@ -15,7 +15,9 @@ import CoreImage.CIFilterBuiltins
 class ImageDisplayViewModel {
     
     var image: CIImage
-    //@ObservationIgnored private
+    @ObservationIgnored private var quadDetectRequest: VNDetectDocumentSegmentationRequest {
+        return VNDetectDocumentSegmentationRequest(completionHandler: self.quadPostProcess)
+    }
     
     init(image: CIImage) {
         self.image = image
@@ -31,16 +33,28 @@ class ImageDisplayViewModel {
         return filter.outputImage
     }
     
-    func cropToTarget() {
+    private func quadPostProcess(request: VNRequest?, error: Error?){
+        if let error {
+            print(error)
+            return
+        } else if let result = request?.results?.first as? VNRectangleObservation {
+            guard let correctedImage = correctPerspective(ciImage: image, topLeft: result.topLeft, topRight: result.topRight, bottomLeft: result.bottomLeft, bottomRight: result.bottomRight) else {
+                print("could not unskew image perspective")
+                return
+            }
+            image = correctedImage
+        } else {
+            print("no data")
+        }
+    }
+    
+    func cropToTarget() async {
         do {
             let handler = VNImageRequestHandler(ciImage: image, options: [:])
-            var quadDetectRequest: VNDetectDocumentSegmentationRequest {
-                return VNDetectDocumentSegmentationRequest()
-            }
             
             try handler.perform([quadDetectRequest])
             
-            guard let results = quadDetectRequest.results?.first else {
+            /*guard let results = quadDetectRequest.results?.first else {
                 print("No results")
                 return
             }
@@ -48,7 +62,8 @@ class ImageDisplayViewModel {
                 print("Could not unskew image perspective")
                 return
             }
-            image = correctedImage
+            image = correctedImage*/
+
         } catch let error {
             print(error)
         }
