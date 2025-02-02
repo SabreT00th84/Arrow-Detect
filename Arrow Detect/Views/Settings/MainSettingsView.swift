@@ -12,7 +12,7 @@ struct MainSettingsView: View {
         NavigationStack {
             List {
                 NavigationLink (destination: ProfileView(), label: {Label("Profile", systemImage: "person.crop.circle")})
-                NavigationLink (destination: ClubLinkView(), label: {Label("Club Link", systemImage: "person.3")})
+                NavigationLink (destination: ClubLinkView(), label: {Label("Club Link", systemImage: "person.2")})
                 NavigationLink (destination: FeaturesView(), label: {Label("Features", systemImage: "wand.and.rays")})
             }
         }

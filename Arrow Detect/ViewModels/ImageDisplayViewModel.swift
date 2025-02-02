@@ -15,21 +15,29 @@ import CoreImage.CIFilterBuiltins
 class ImageDisplayViewModel {
     
     var image: CIImage
-    @ObservationIgnored private var quadDetectRequest: VNDetectDocumentSegmentationRequest {
-        return VNDetectDocumentSegmentationRequest(completionHandler: self.quadPostProcess)
+    @ObservationIgnored private var quadDetectRequest: VNDetectRectanglesRequest {
+        let request = VNDetectRectanglesRequest(completionHandler: self.quadPostProcess)
+        request.maximumObservations = 1
+        request.minimumSize = 0.4
+        request.minimumConfidence = 0.8
+        request.quadratureTolerance = 10
+        return request
     }
     
     init(image: CIImage) {
         self.image = image
     }
     
-    private func correctPerspective(ciImage: CIImage, topLeft:CGPoint, topRight:CGPoint, bottomLeft:CGPoint, bottomRight:CGPoint) -> CIImage? {
+    private func correctPerspective(ciImage: CIImage, rectangle: VNRectangleObservation) -> CIImage? {
         let filter = CIFilter.perspectiveCorrection()
+        let width = ciImage.extent.width
+        let height = ciImage.extent.height
+        
         filter.inputImage = ciImage
-        filter.topLeft = topLeft
-        filter.topRight = topRight
-        filter.bottomLeft = bottomLeft
-        filter.bottomRight = bottomRight
+        filter.topLeft = CGPoint(x: rectangle.topLeft.x * width, y: rectangle.topLeft.y * height)
+        filter.topRight = CGPoint(x: rectangle.topRight.x * width, y: rectangle.topRight.y * height)
+        filter.bottomLeft = CGPoint(x: rectangle.bottomLeft.x * width, y: rectangle.bottomLeft.y * height)
+        filter.bottomRight = CGPoint(x: rectangle.bottomRight.x * width, y: rectangle.bottomRight.y * height)
         return filter.outputImage
     }
     
@@ -38,7 +46,7 @@ class ImageDisplayViewModel {
             print(error)
             return
         } else if let result = request?.results?.first as? VNRectangleObservation {
-            guard let correctedImage = correctPerspective(ciImage: image, topLeft: result.topLeft, topRight: result.topRight, bottomLeft: result.bottomLeft, bottomRight: result.bottomRight) else {
+            guard let correctedImage = correctPerspective(ciImage: image, rectangle: result) else {
                 print("could not unskew image perspective")
                 return
             }
