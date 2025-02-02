@@ -17,12 +17,14 @@ struct ImageDisplayView: View {
             if let cgImage = CIContext().createCGImage(viewModel.image, from: viewModel.image.extent) {
                 Image(cgImage, scale: 1, label: Text("Target Image"))
                     .resizable()
-                    .scaledToFill()
+                    .scaledToFit()
                 Button("Score") {
-                    viewModel.cropToTarget()
+                    Task {
+                        await viewModel.cropToTarget()
+                    }
                 }
                 .buttonStyle(.borderedProminent)
-                .padding()
+                .padding(.bottom, 50)
             }
         }
     }
