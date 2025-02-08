@@ -20,7 +20,7 @@ struct ImageDisplayView: View {
                     .scaledToFit()
                 Button("Score") {
                     Task {
-                        await viewModel.cropToTarget()
+                        await viewModel.score()
                     }
                 }
                 .buttonStyle(.borderedProminent)
