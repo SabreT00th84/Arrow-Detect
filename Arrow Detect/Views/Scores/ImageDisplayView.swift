@@ -10,7 +10,9 @@ import SwiftUI
 struct ImageDisplayView: View {
     
     let image: CIImage
+    let targetSize: ScoresheetViewModel.TargetSize
     @State var viewModel: ImageDisplayViewModel
+    
     
     var body: some View {
         ZStack (alignment: .bottom) {
@@ -20,7 +22,7 @@ struct ImageDisplayView: View {
                     .scaledToFit()
                 Button("Score") {
                     Task {
-                        await viewModel.score()
+                        await viewModel.process()
                     }
                 }
                 .buttonStyle(.borderedProminent)
@@ -29,9 +31,10 @@ struct ImageDisplayView: View {
         }
     }
     
-    init (image: CIImage) {
+    init (image: CIImage, targetSize: ScoresheetViewModel.TargetSize) {
         self.image = image
-        self.viewModel = ImageDisplayViewModel(image: image)
+        self.targetSize = targetSize
+        self.viewModel = ImageDisplayViewModel(image: image, targetSize: targetSize)
     }
 }
 

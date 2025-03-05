@@ -16,6 +16,12 @@ class ScoresheetViewModel {
     var errorMessage = ""
     var showCameraView = false
     var showImageView = false
+    var selectedSize = TargetSize.eighty
+    
+    enum TargetSize: Int {
+        case eighty = 80
+        case sixty = 60
+    }
     
     func loadData() async {
         guard let userID = Auth.auth().currentUser?.uid else {

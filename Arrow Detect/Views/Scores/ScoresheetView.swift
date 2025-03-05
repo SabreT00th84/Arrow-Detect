@@ -13,6 +13,10 @@ struct ScoresheetView: View {
     
     var body: some View {
         Form {
+            Picker("Target Size", selection: $viewModel.selectedSize) {
+                Text("80cm").tag(ScoresheetViewModel.TargetSize.eighty)
+                Text("60cm").tag(ScoresheetViewModel.TargetSize.sixty)
+            }
             ForEach (0..<5) { endIndex in
                 Section ("End \(endIndex + 1)") {
                     arrowsView(endIndex: endIndex)
@@ -22,7 +26,7 @@ struct ScoresheetView: View {
         }
         .fullScreenCover(isPresented: $viewModel.showCameraView) {
             if let image = camera.image {
-                ImageDisplayView(image: image)
+                ImageDisplayView(image: image, targetSize: viewModel.selectedSize)
             } else {
                 CameraView(viewModel: $camera)
             }

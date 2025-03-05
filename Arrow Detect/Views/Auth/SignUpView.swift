@@ -26,8 +26,8 @@ struct SignUpView: View {
                     SecureField("Password", text: $viewModel.password)
                     SecureField("Confirm", text: $viewModel.confirm)
                     Picker("Role", selection: $viewModel.role) {
-                        Text("Archer").tag(SignUpViewModel.roles.archer)
-                        Text("Instructor").tag(SignUpViewModel.roles.instructor)
+                        Text("Archer").tag(SignUpViewModel.Roles.archer)
+                        Text("Instructor").tag(SignUpViewModel.Roles.instructor)
                     }
                 }
             }
