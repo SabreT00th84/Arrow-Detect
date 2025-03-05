@@ -15,14 +15,14 @@ class SignUpViewModel: ObservableObject {
     @Published var email = ""
     @Published var password = ""
     @Published var confirm = ""
-    @Published var role = roles.archer
+    @Published var role = Roles.archer
     @Published var message = ""
     @Published var offset = 0
     @Published var isLoading = false
     @Published var hasAccount = false
     @Published var profileImage: Data?
     
-    enum roles {
+    enum Roles {
         case archer, instructor
     }
     
@@ -81,12 +81,12 @@ class SignUpViewModel: ObservableObject {
         
         let userId = result.user.uid
         
-        let newUser = User(id: userId, name: name, email: email, joinDate: Date().timeIntervalSince1970, isInstructor: role == roles.instructor, publicId: publicId)
+        let newUser = User(id: userId, name: name, email: email, joinDate: Date().timeIntervalSince1970, isInstructor: role == Roles.instructor, publicId: publicId)
         let db = Firestore.firestore()
         DispatchQueue.main.sync {
             do {
                 try db.collection("Users").document(userId).setData(from: newUser)
-                if role == roles.instructor {
+                if role == Roles.instructor {
                     db.collection("Instructors").addDocument(data: ["userId": userId])
                 } else {
                     db.collection("Archers").addDocument(data: ["userId": userId, "instructorId": ""])
