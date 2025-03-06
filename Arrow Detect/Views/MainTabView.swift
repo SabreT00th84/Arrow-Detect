@@ -12,7 +12,7 @@ struct MainTabView: View {
     
     @Environment(\.modelContext) var modelContext
     @State var viewModel = MainTabViewModel()
-    @Query private var items: [Score]
+    @Query private var items: [Item]
     
     var body: some View {
         Group {
@@ -40,7 +40,7 @@ struct MainTabView: View {
     
     private func addItem() {
         withAnimation {
-            let newItem = Score(timestamp: Date())
+            let newItem = Item(timestamp: Date())
             modelContext.insert(newItem)
             viewModel.showScoresheet = true
         }

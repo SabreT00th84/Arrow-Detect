@@ -15,7 +15,7 @@ struct Arrow_DetectApp: App {
     @StateObject var authTest =  AuthenticationTest()
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Score.self,
+            Item.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

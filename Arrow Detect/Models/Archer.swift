@@ -8,7 +8,7 @@
 import Foundation
 
 struct Archer: Codable {
-    let id: String
+    let archerId: String
     let userId: String
     let instructorId: String
 }
