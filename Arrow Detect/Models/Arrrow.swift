@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct Arrow {
+struct Arrow: Codable {
     let arrowId: String
     let endId: String
-    let x: Int
-    let y: Int
+    let x: Float
+    let y: Float
     let score: String
     
 }

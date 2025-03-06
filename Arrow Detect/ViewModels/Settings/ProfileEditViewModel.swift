@@ -75,10 +75,10 @@ class ProfileEditViewModel: ObservableObject {
     
     private func uploadImage (image: UIImage) async throws -> String {
         guard let data = image.pngData() else { return ""}
-        if user.publicId != "" {
+        if user.imageId != "" {
             do {
-                let (signature, timestamp) = try await generateSignature(publicId: user.publicId, folder: "profile-pictures")
-                try await deleteImage(publicId: user.publicId,  folder: "profile-pictures", signature: signature, timestamp: timestamp)
+                let (signature, timestamp) = try await generateSignature(publicId: user.imageId, folder: "profile-pictures")
+                try await deleteImage(publicId: user.imageId,  folder: "profile-pictures", signature: signature, timestamp: timestamp)
             } catch let error {
                 print("error occured deleting old profile picture")
                 throw error

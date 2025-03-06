@@ -18,6 +18,17 @@ struct ScoresheetView: View {
                     Text("80cm").tag(ScoresheetViewModel.TargetSize.eighty)
                     Text("60cm").tag(ScoresheetViewModel.TargetSize.sixty)
                 }
+                Picker("Bow Type", selection: $viewModel.selectedBow) {
+                    Text("Barebow").tag(ScoresheetViewModel.BowType.barebow)
+                    Text("Recurve").tag(ScoresheetViewModel.BowType.recurve)
+                }
+                Picker("Distance", selection: $viewModel.selectedDistance) {
+                    Text("10m").tag(ScoresheetViewModel.Distance.ten)
+                    Text("14m").tag(ScoresheetViewModel.Distance.fourteen)
+                    Text("18m").tag(ScoresheetViewModel.Distance.eighteen)
+                    Text("25m").tag(ScoresheetViewModel.Distance.twentyFive)
+                    Text("30m").tag(ScoresheetViewModel.Distance.thirty)
+                }
                 ForEach (0..<5) { endIndex in
                     Section {
                         arrowsView(endIndex: endIndex)
@@ -31,7 +42,9 @@ struct ScoresheetView: View {
                 HStack {
                     Spacer()
                     Button("Submit") {
-                        viewModel.submit()
+                        Task {
+                            await viewModel.submit()
+                        }
                     }
                     .buttonStyle(.borderedProminent)
                     .controlSize(.large)

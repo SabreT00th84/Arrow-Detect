@@ -12,7 +12,7 @@ import Foundation
 
 class ProfileViewModel: ObservableObject {
 
-    @Published var user = User(id: "", name: "", email: "", joinDate: Date().timeIntervalSince1970, isInstructor: false, publicId: "")
+    @Published var user = User(userId: "", name: "", email: "", joinDate: Date().timeIntervalSince1970, isInstructor: false, imageId: "")
     @Published var imageUrl = ""
     
     func loadData () async {
@@ -42,7 +42,7 @@ class ProfileViewModel: ObservableObject {
     
     func generateImageUrl() {
         let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "duy78o4dc", apiKey: "984745322689627", secure: true))
-        guard let url = cloudinary.createUrl().setTransformation(CLDTransformation().setGravity("face").setHeight(50).setWidth(50).setCrop("thumb")).generate(user.publicId) else {
+        guard let url = cloudinary.createUrl().setTransformation(CLDTransformation().setGravity("face").setHeight(50).setWidth(50).setCrop("thumb")).generate(user.imageId) else {
             print("error occured generating url")
             return
         }
