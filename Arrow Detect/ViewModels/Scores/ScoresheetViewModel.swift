@@ -12,7 +12,8 @@ import FirebaseAuth
 @Observable
 class ScoresheetViewModel {
     var archer = Archer(id: "", userId: "", instructorId: "")
-    var scores:[[String]] = Array(repeating: Array(repeating: "", count: 3), count: 5)
+    var arrows: [[Arrow?]] = Array(repeating: Array(repeating: nil, count: 3), count: 5)
+    var scores: [[String]] = Array(repeating: Array(repeating: "", count: 3), count: 5)
     var errorMessage = ""
     var showCameraView = false
     var showImageView = false
@@ -39,6 +40,18 @@ class ScoresheetViewModel {
         } catch let error {
             print(error.localizedDescription)
             return
+        }
+    }
+    
+    func submit() {
+        let db = Firestore.firestore()
+        
+        for (x, end) in arrows.enumerated() {
+            for (y, arrow) in end.enumerated() {
+                if arrow == nil {
+                    arrows[x][y] = Arrow(arrowId: "", endId: "", x: 0, y: 0, score: scores[x][y])
+                }
+            }
         }
     }
 }

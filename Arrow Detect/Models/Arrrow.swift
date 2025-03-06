@@ -12,6 +12,6 @@ struct Arrow {
     let endId: String
     let x: Int
     let y: Int
-    let score: Int
+    let score: String
     
 }
