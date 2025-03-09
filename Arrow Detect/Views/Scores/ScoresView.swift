@@ -6,29 +6,50 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct ScoresView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Environment(MainTabViewModel.self) var viewModel
-    @Query private var items: [Item]
+    @Environment(MainTabViewModel.self) var tabViewModel
+    @State private var viewModel = ScoresViewModel()
+    @State private var scores: [Score] = []
+    
     var body: some View {
         List {
-            ForEach(items) { item in
+            ForEach(scores, id: \.scoreId) { score in
                 NavigationLink {
-                    Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
+                    StatsView(score: score)
                 } label: {
-                    Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+                    Text(score.date.formatted(date: .abbreviated, time: .shortened))
                 }
             }
-            .onDelete(perform: deleteItems)
+            .onDelete(perform: deleteScores)
+        }
+        .task {
+            self.scores = await viewModel.loadScores()
+            print("task completed")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("ScoresheetSubmitted"))) { notification in
+            Task {@MainActor in
+                if let object = notification.userInfo?["record"] as? Score {
+                    withAnimation {
+                        self.scores.append(object)
+                    }
+                } else {
+                    self.scores = await viewModel.loadScores()
+                }
+            }
         }
     }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+    
+    func deleteScores (offsets: IndexSet) {
+        let idsToDelete = offsets.map { scores[$0].scoreId }
+        Task {
+            do {
+                try await viewModel.deleteRecords(scoreIds: idsToDelete)
+                await MainActor.run {
+                    scores.remove(atOffsets: offsets)
+                }
+            } catch let error {
+                print(error.localizedDescription)
             }
         }
     }
@@ -36,5 +57,4 @@ struct ScoresView: View {
 
 #Preview {
     ScoresView()
-        .modelContainer(for: Item.self, inMemory: true)
 }

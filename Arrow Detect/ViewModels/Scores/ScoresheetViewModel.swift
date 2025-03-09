@@ -19,7 +19,7 @@ class ScoresheetViewModel {
     var images: [CIImage?] = Array(repeating: nil, count: 5)
     var imageIds: [String?] = Array(repeating: nil, count: 5)
     var errorMessage = ""
-    var offset = 0
+    var isLoading = false
     var showCameraView = false
     var showImageView = false
     var selectedSize = TargetSize.eighty
@@ -89,14 +89,14 @@ class ScoresheetViewModel {
         } else if score.uppercased() == "M"{
             return 0
         } else {
-            return Int(score) ?? 0
+            return Int(score) ?? -1
         }
     }
     
     func createStatsRecord (score: Score, prevScoreId: String?, groupRadii: [Float]) async throws {
         do {
             let db = Firestore.firestore()
-            let statDoc = db.collection("Stats").document()
+            let statsDoc = db.collection("Stats").document()
             let simplifiedScores = scores.flatMap{$0}.map {$0.uppercased()}
             let intScores = simplifiedScores.map {self.intScore(score: $0)}
             let avgScore = Float(intScores.reduce(0, +))/Float(intScores.count)
@@ -111,12 +111,9 @@ class ScoresheetViewModel {
             }
             
             if let prevScoreId {
-                let prevStat = try await db.collection("Stats")
+                guard let prevStat = try await db.collection("Stats")
                     .whereField("scoreId", isEqualTo: prevScoreId)
-                    .getDocuments().documents.first?.data(as: Stat.self)
-                guard let prevStat else {
-                    errorMessage = "Could not calculate performance improvement"
-                    offset = 20
+                    .getDocuments().documents.first?.data(as: Stat.self) else {
                     return
                 }
                 perfImprovement = round((((perfScore - prevStat.perfImprovement)/prevStat.perfImprovement) * 100)*100)/100.0
@@ -124,7 +121,7 @@ class ScoresheetViewModel {
                 perfImprovement = 0
             }
             
-            let statObject =  Stat(statId: statDoc.documentID,
+            let statObject =  Stat(statId: statsDoc.documentID,
                                    scoreId: score.scoreId,
                                    avgScore: avgScore,
                                    noOfX: simplifiedScores.count {$0 == "X"},
@@ -142,7 +139,7 @@ class ScoresheetViewModel {
                                    avgEndGroupradius: avgGroupRad,
                                    perfScore: perfScore,
                                    perfImprovement: perfImprovement)
-            try statDoc.setData(from: statObject)
+            try statsDoc.setData(from: statObject)
             
         } catch let error {
             throw error
@@ -152,7 +149,6 @@ class ScoresheetViewModel {
     func calculateGroupRadius (points: [(Float, Float)]) -> Float {
         guard points.count >= 3 else {
             errorMessage = "Not enough points to calculate group radius"
-            offset = 20
             return 0
         }
         
@@ -162,19 +158,40 @@ class ScoresheetViewModel {
         
         return sqrt(pow(solution.x, 2) + pow(solution.y, 2) - solution.z)
     }
+    func validate() -> Bool {
+        let flatArray = scores.flatMap{$0}
+        let intArray = flatArray.map{intScore(score: $0)}
+        guard flatArray.filter({$0.trimmingCharacters(in: .whitespacesAndNewlines) == "" }).isEmpty else {
+            errorMessage = "Please fill in all fields"
+            return false
+        }
+        
+        guard !intArray.contains(where: {$0 < 0 || $0 > 10}) else {
+            errorMessage = "Please ensure you only enter numbers between 1-10, an X or M"
+            return false
+        }
+        
+        return true
+    }
     
-    func submit() async {
+    @MainActor
+    func submit() async -> Bool {
         do {
+            isLoading = true
+            
+            guard validate() else {return false}
             guard let userId = Auth.auth().currentUser?.uid else {
                 errorMessage = "User is not logged in"
-                offset = 20
-                return
+                isLoading = false
+                return false
             }
             
             let db = Firestore.firestore()
             let scoreDoc = db.collection("Scores").document()
-            let statsDoc = db.collection("Stats").document()
-            let archerId = try await db.collection("Archers").document(userId).getDocument(as: Archer.self).archerId
+            guard let archerId = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self).archerId else {
+                errorMessage = "Could not retrive Archer record"
+                return false
+            }
             var scoreTotal = 0
             var groupRadii: [Float] = []
             
@@ -220,7 +237,7 @@ class ScoresheetViewModel {
             
             let scoreObject = Score(scoreId: scoreDoc.documentID,
                                     archerId: archerId,
-                                    date: Date().timeIntervalSince1970,
+                                    date: Date.now,
                                     bowType: selectedBow.rawValue,
                                     targetSize: selectedSize.rawValue,
                                     distance: selectedDistance.rawValue,
@@ -229,9 +246,14 @@ class ScoresheetViewModel {
             try scoreDoc.setData(from: scoreObject)
             let prevScore = try await db.collection("Scores").whereField("date", isLessThan: scoreObject.date).order(by: "date").getDocuments().documents.first?.data(as: Score.self)
             try await createStatsRecord(score: scoreObject, prevScoreId: prevScore?.scoreId, groupRadii: groupRadii)
+            NotificationCenter.default.post(name: Notification.Name("ScoresheetSubmitted"), object: nil, userInfo: ["record": scoreObject])
+            isLoading = false
+            return true
         } catch let error {
             errorMessage = error.localizedDescription
-            offset = 40
+            isLoading = false
+            print(error)
+            return false
         }
     }
 }

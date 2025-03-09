@@ -11,7 +11,7 @@ struct User: Codable  {
     let userId: String
     let name: String
     let email: String
-    let joinDate: TimeInterval
+    let joinDate: Date
     let isInstructor: Bool
     let imageId: String
 }

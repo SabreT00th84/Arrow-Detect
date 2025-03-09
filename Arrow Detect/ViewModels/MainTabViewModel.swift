@@ -12,4 +12,7 @@ class MainTabViewModel: ObservableObject {
     var showScoresheet = false
     var selection = 0
     
+    func addItem () {
+        showScoresheet = true
+    }
 }

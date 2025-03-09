@@ -81,7 +81,7 @@ class SignUpViewModel: ObservableObject {
         
         let userId = result.user.uid
         
-        let newUser = User(userId: userId, name: name, email: email, joinDate: Date().timeIntervalSince1970, isInstructor: role == Roles.instructor, imageId: publicId)
+        let newUser = User(userId: userId, name: name, email: email, joinDate: Date.now, isInstructor: role == Roles.instructor, imageId: publicId)
         let db = Firestore.firestore()
         DispatchQueue.main.sync {
             do {

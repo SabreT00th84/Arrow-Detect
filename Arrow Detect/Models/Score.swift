@@ -7,10 +7,10 @@
 
 import Foundation
 
-struct Score: Codable {
+struct Score: Codable, Equatable {
     let scoreId: String
     let archerId: String
-    let date: TimeInterval
+    let date: Date
     let bowType: String
     let targetSize: Int
     let distance: Int
