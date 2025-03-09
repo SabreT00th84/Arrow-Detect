@@ -110,13 +110,8 @@ class ScoresheetViewModel {
                 perfScore = Float(score.scoreTotal)
             }
             
-            if let prevScoreId {
-                guard let prevStat = try await db.collection("Stats")
-                    .whereField("scoreId", isEqualTo: prevScoreId)
-                    .getDocuments().documents.first?.data(as: Stat.self) else {
-                    return
-                }
-                perfImprovement = round((((perfScore - prevStat.perfImprovement)/prevStat.perfImprovement) * 100)*100)/100.0
+            if let prevScoreId, let prevPerf = try await db.collection("Stats").whereField("scoreId", isEqualTo: prevScoreId).getDocuments().documents.first?.data(as: Stat.self).perfImprovement, prevPerf > 0 {
+                perfImprovement = round((((perfScore - prevPerf)/prevPerf) * 100)*100)/100.0
             } else {
                 perfImprovement = 0
             }
@@ -158,6 +153,7 @@ class ScoresheetViewModel {
         
         return sqrt(pow(solution.x, 2) + pow(solution.y, 2) - solution.z)
     }
+    
     func validate() -> Bool {
         let flatArray = scores.flatMap{$0}
         let intArray = flatArray.map{intScore(score: $0)}
@@ -179,7 +175,10 @@ class ScoresheetViewModel {
         do {
             isLoading = true
             
-            guard validate() else {return false}
+            guard validate() else {
+                isLoading = false
+                return false
+            }
             guard let userId = Auth.auth().currentUser?.uid else {
                 errorMessage = "User is not logged in"
                 isLoading = false
