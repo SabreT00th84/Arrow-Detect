@@ -8,11 +8,13 @@
 import SwiftUI
 
 struct ScoresheetView: View {
+    
+    @Environment(\.dismiss) var dismiss
     @State var viewModel =  ScoresheetViewModel()
     @State var camera = CameraViewModel()
     
     var body: some View {
-        VStack {
+        ZStack {
             Form {
                 Picker("Target Size", selection: $viewModel.selectedSize) {
                     Text("80cm").tag(ScoresheetViewModel.TargetSize.eighty)
@@ -39,21 +41,32 @@ struct ScoresheetView: View {
                         Text("Automatic detection is still in development")
                     }
                 }
-                HStack {
-                    Spacer()
-                    Button("Submit") {
-                        Task {
-                            await viewModel.submit()
+                Section {
+                    HStack {
+                        Spacer()
+                        Button("Submit") {
+                            Task {
+                                let result = await viewModel.submit()
+                                if result {
+                                    dismiss()
+                                }
+                            }
                         }
+                        .buttonStyle(.borderedProminent)
+                        .controlSize(.large)
+                        Spacer()
                     }
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.large)
-                    Spacer()
+                } footer: {
+                    Text(viewModel.errorMessage)
                 }
             }
             
+            if viewModel.isLoading {
+                ProgressView()
+                    .progressViewStyle(.circular)
+                    .controlSize(.large)
+            }
         }
-        //.background(Color.)
         .fullScreenCover(isPresented: $viewModel.showCameraView) {
             if let image = camera.image {
                 ImageDisplayView(image: image, targetSize: viewModel.selectedSize)
@@ -68,7 +81,6 @@ struct ScoresheetView: View {
         HStack {
             ForEach (0..<3) { arrowIndex in
                 TextField("Arrow \(arrowIndex + 1)", text: $viewModel.scores[endIndex][arrowIndex])
-                    .textCase(.uppercase)
             }
         }
     }

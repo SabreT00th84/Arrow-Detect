@@ -12,7 +12,7 @@ import Foundation
 
 class ProfileViewModel: ObservableObject {
 
-    @Published var user = User(userId: "", name: "", email: "", joinDate: Date().timeIntervalSince1970, isInstructor: false, imageId: "")
+    @Published var user = User(userId: "", name: "", email: "", joinDate: Date.now, isInstructor: false, imageId: "")
     @Published var imageUrl = ""
     
     func loadData () async {

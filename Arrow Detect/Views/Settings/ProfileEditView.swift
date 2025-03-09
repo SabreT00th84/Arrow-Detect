@@ -53,5 +53,5 @@ struct ProfileEditView: View {
 }
 
 #Preview {
-    ProfileEditView(givenUser: User(userId: "1", name: "Your Name", email: "yourname@example.com", joinDate: Date().timeIntervalSince1970, isInstructor: false, imageId: ""))
+    ProfileEditView(givenUser: User(userId: "1", name: "Your Name", email: "yourname@example.com", joinDate: Date.now, isInstructor: false, imageId: ""))
 }

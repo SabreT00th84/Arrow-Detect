@@ -6,17 +6,14 @@
 //
 
 import SwiftUI
-import SwiftData
 
 struct MainTabView: View {
-    
-    @Environment(\.modelContext) var modelContext
     @State var viewModel = MainTabViewModel()
-    @Query private var items: [Item]
+    @State var path = NavigationPath()
     
     var body: some View {
         Group {
-            NavigationStack {
+            NavigationStack (path: $path) {
                 TabView (selection: $viewModel.selection){
                     Tab(value: 0, content: {ScoresView()}, label: {Label("Scores", systemImage: "chart.bar.xaxis")})
                     Tab(value: 1, content: {LeaderboardView()}, label: {Label("Leaderboard", systemImage: "trophy")})
@@ -27,7 +24,7 @@ struct MainTabView: View {
                 .toolbar {
                     if viewModel.selection == 0 {
                         ToolbarItem {
-                         Button(action: addItem) {
+                            Button(action: viewModel.addItem) {
                          Label("Add Item", systemImage: "plus")
                             }
                         }
@@ -36,22 +33,6 @@ struct MainTabView: View {
             }
         }
         .environment(viewModel)
-    }
-    
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-            viewModel.showScoresheet = true
-        }
-    }
-    
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
     }
 }
 
