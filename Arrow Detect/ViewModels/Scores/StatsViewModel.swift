@@ -28,10 +28,13 @@ class StatsViewModel {
             ends = try await db.collection("Ends").whereField("scoreId", isEqualTo: score.scoreId).getDocuments().documents.map({try $0.data(as: End.self)})
             stat = try await db.collection("Stats").whereField("scoreId", isEqualTo: score.scoreId).getDocuments().documents.first?.data(as: Stat.self)
             
+            var tempArrows: [[Arrow]] = []
             for end in ends {
                 let array = try await db.collection("Arrows").whereField("endId", isEqualTo: end.endId).getDocuments().documents.map({try $0.data(as: Arrow.self)})
-                arrows.append(array)
+                tempArrows.append(array)
             }
+            
+            arrows = tempArrows
             
             generateTableData()
             verify()
