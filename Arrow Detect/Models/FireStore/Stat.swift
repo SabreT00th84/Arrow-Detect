@@ -6,24 +6,25 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Stat: Codable {
-    let statId: String
-    let scoreId: String
-    let avgScore: Float
-    let noOfX: Int
-    let noOf10: Int
-    let noOf9: Int
-    let noOf8: Int
-    let noOf7: Int
-    let noOf6: Int
-    let noOf5: Int
-    let noOf4: Int
-    let noOf3: Int
-    let noOf2: Int
-    let noOf1: Int
-    let noOfM: Int
-    let avgEndGroupradius: Float
-    let perfScore: Float
-    let perfImprovement: Float
+    @DocumentID var statId: String?
+    var scoreId: String
+    var avgScore: Float
+    var noOfX: Int
+    var noOf10: Int
+    var noOf9: Int
+    var noOf8: Int
+    var noOf7: Int
+    var noOf6: Int
+    var noOf5: Int
+    var noOf4: Int
+    var noOf3: Int
+    var noOf2: Int
+    var noOf1: Int
+    var noOfM: Int
+    var avgEndGroupradius: Float
+    var perfScore: Float
+    var perfImprovement: Float
 }

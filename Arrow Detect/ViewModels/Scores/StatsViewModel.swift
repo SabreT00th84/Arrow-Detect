@@ -16,23 +16,21 @@ class StatsViewModel {
     var arrows: [[Arrow]] = []
     var tableData: [ScoreTableRow] = []
     var verification = ""
-    @ObservationIgnored var twoDPFormat = NumberFormatter()
     
     init(score: Score) {
         self.score = score
-        twoDPFormat.numberStyle = .decimal
     }
     
     @MainActor
     func loadData() async {
         do {
             let db = Firestore.firestore()
-            ends = try await db.collection("Ends").whereField("scoreId", isEqualTo: score.scoreId).getDocuments().documents.map({try $0.data(as: End.self)})
-            stat = try await db.collection("Stats").whereField("scoreId", isEqualTo: score.scoreId).getDocuments().documents.first?.data(as: Stat.self)
+            ends = try await db.collection("Ends").whereField("scoreId", isEqualTo: score.scoreId!).getDocuments().documents.map({try $0.data(as: End.self)})
+            stat = try await db.collection("Stats").whereField("scoreId", isEqualTo: score.scoreId!).getDocuments().documents.first?.data(as: Stat.self)
             
             var tempArrows: [[Arrow]] = []
             for end in ends {
-                let array = try await db.collection("Arrows").whereField("endId", isEqualTo: end.endId).getDocuments().documents.map({try $0.data(as: Arrow.self)})
+                let array = try await db.collection("Arrows").whereField("endId", isEqualTo: end.endId!).getDocuments().documents.map({try $0.data(as: Arrow.self)})
                 tempArrows.append(array)
             }
             

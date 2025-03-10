@@ -6,11 +6,13 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct AwardStatus: Codable {
+    @DocumentID var awardStatusId: String?
     var archerId: String
     var awardId: String
-    var completionPercentage: Float
+    var completionRatio: Float
     var isVerified: Bool
-    var dateCompleted: Date
+    @ExplicitNull var dateCompleted: Date?
 }

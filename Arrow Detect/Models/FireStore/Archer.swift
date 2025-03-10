@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Archer: Codable {
-    let archerId: String
-    let userId: String
-    let instructorId: String
+    @DocumentID var archerId: String?
+    var userId: String
+    var instructorId: String
 }

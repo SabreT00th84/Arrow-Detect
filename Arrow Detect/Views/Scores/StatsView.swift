@@ -11,6 +11,7 @@ import Charts
 struct StatsView: View {
     
     @State var viewModel: StatsViewModel
+    var twoDPFormat = NumberFormatter()
     
     var body: some View {
         let headers = ["End", "Arrow 1", "Arrow 2", "Arrow 3", "End Total"]
@@ -21,7 +22,7 @@ struct StatsView: View {
                 Text("**Distance:** \(viewModel.score.distance)")
                 Text("**Targt Size:** \(viewModel.score.targetSize)")
             }
-            LazyHGrid(rows: [GridItem(.fixed(50))], spacing: 10) {
+            LazyHGrid(rows: [GridItem(.fixed(50), alignment: .center)], spacing: 10) {
                 ForEach(headers, id: \.self) {header in
                         Text(header)
                         .font(.headline)
@@ -39,7 +40,7 @@ struct StatsView: View {
             Text("Grand Total: \(viewModel.score.scoreTotal)")
                 .font(.headline)
             if let stat = viewModel.stat {
-                Text("**Average Score:** \(String(describing: viewModel.twoDPFormat.string(for: stat.avgScore)))")
+                Text("**Average Score:** \(twoDPFormat.string(for: stat.avgScore) ?? "")")
                 Text("Arrow Distibution")
                     .font(.title)
                 Chart {
@@ -141,8 +142,8 @@ struct StatsView: View {
                         }
                 }
                 .scaledToFit()
-                Text("**Performance Score:** \(String(describing: viewModel.twoDPFormat.string(for: stat.perfScore)))")
-                Text("**Performance Improvement:** \(String(describing: viewModel.twoDPFormat.string(for: stat.perfImprovement)))")
+                Text("**Performance Score:** \(twoDPFormat.string(for: stat.perfScore) ?? "")")
+                Text("**Performance Improvement:** \(twoDPFormat.string(for: stat.perfImprovement) ?? "")")
             }
         }
         .navigationTitle(viewModel.score.date.formatted(date: .numeric, time: .shortened))
@@ -152,6 +153,8 @@ struct StatsView: View {
     }
     
     init (score: Score) {
+        twoDPFormat.numberStyle = .decimal
+        twoDPFormat.maximumFractionDigits = 2
         self.viewModel = StatsViewModel(score: score)
     }
 }

@@ -12,6 +12,16 @@ struct LeaderboardView: View {
     @State var viewModel = LeaderboardViewModel()
     
     var body: some View {
+        if let error = viewModel.errorMessage {
+            Text(error)
+                .font(.callout)
+        }else {
+            main
+        }
+    }
+    
+    @ViewBuilder
+    var main: some View {
         VStack {
             Picker("Interval", selection: $viewModel.selectedInterval) {
                 Text("Weekly").tag(7)
@@ -32,11 +42,12 @@ struct LeaderboardView: View {
             }
         }
     }
+
     @ViewBuilder
     var loop: some View {
-        ForEach(viewModel.topScores, id: \.0?.userId) {(user, score) in
+        ForEach(viewModel.topScores, id: \.0.userId) {(user, score) in
             HStack {
-                Text("\(user?.name ?? "")")
+                Text("\(user.name)")
                 Spacer()
                 Text("\(score.scoreTotal)")
             }

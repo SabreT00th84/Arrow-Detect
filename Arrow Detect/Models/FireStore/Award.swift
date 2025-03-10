@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Award: Codable {
-    let awardId: String
-    let name: String
-    let noOfRequirements: Int
+    @DocumentID var awardId: String?
+    var name: String
+    var noOfRequirements: Int
 }

@@ -6,14 +6,15 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Score: Codable, Equatable, Hashable {
-    let scoreId: String
-    let archerId: String
-    let date: Date
-    let bowType: String
-    let targetSize: Int
-    let distance: Int
-    let scoreTotal: Int
-    let instructorComment: String
+    @DocumentID var scoreId: String?
+    var archerId: String
+    var date: Date
+    var bowType: String
+    var targetSize: Int
+    var distance: Int
+    var scoreTotal: Int
+    var instructorComment: String
 }

@@ -81,19 +81,17 @@ class SignUpViewModel: ObservableObject {
         
         let userId = result.user.uid
         
-        let newUser = User(userId: userId, name: name, email: email, joinDate: Date.now, isInstructor: role == Roles.instructor, imageId: publicId)
+        let newUser = User(name: name, email: email, joinDate: Date.now, isInstructor: role == Roles.instructor, imageId: publicId)
         let db = Firestore.firestore()
         DispatchQueue.main.sync {
             do {
                 try db.collection("Users").document(userId).setData(from: newUser)
                 if role == Roles.instructor {
-                    let document = db.collection("Instructors").document()
-                    let instructor = Instructor(instructorId: document.documentID, userId: userId)
-                    try document.setData(from: instructor)
+                    let newInstructor = Instructor(userId: userId)
+                    try db.collection("Instructors").document().setData(from:newInstructor)
                 } else {
-                    let document = db.collection("Archers").document()
-                    let archer = Archer(archerId: document.documentID, userId: userId, instructorId: "")
-                    try document.setData(from: archer)
+                    let newArcher = Archer(userId: userId, instructorId: "")
+                    try db.collection("Archers").document().setData(from: newArcher)
                 }
                 self.isLoading = false
             } catch {

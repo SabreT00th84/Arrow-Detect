@@ -6,12 +6,13 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct User: Codable  {
-    let userId: String
-    let name: String
-    let email: String
-    let joinDate: Date
-    let isInstructor: Bool
-    let imageId: String
+    @DocumentID var userId: String?
+    var name: String
+    var email: String
+    var joinDate: Date
+    var isInstructor: Bool
+    var imageId: String
 }

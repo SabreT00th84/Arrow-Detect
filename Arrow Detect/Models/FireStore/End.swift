@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct End: Codable {
-    var endId: String
+    @DocumentID var endId: String?
     var scoreId: String
     var endTotal: Int
     var isVerified: Bool
