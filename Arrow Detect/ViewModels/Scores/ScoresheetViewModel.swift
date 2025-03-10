@@ -44,6 +44,7 @@ class ScoresheetViewModel {
         case thirty = 30
     }
     
+    @MainActor
     func loadData() async {
         guard let userID = Auth.auth().currentUser?.uid else {
             print("Could not find current user")
@@ -54,9 +55,7 @@ class ScoresheetViewModel {
         
         do {
             let snapshot = try await db.collection("Archers").document(userID).getDocument()
-            try DispatchQueue.main.sync {
-                self.archer = try snapshot.data(as: Archer.self)
-            }
+            self.archer = try snapshot.data(as: Archer.self)
         } catch let error {
             print(error.localizedDescription)
             return
@@ -96,7 +95,6 @@ class ScoresheetViewModel {
     func createStatsRecord (score: Score, prevScoreId: String?, groupRadii: [Float]) async throws {
         do {
             let db = Firestore.firestore()
-            let statsDoc = db.collection("Stats").document()
             let simplifiedScores = scores.flatMap{$0}.map {$0.uppercased()}
             let intScores = simplifiedScores.map {self.intScore(score: $0)}
             let avgScore = Float(intScores.reduce(0, +))/Float(intScores.count)
@@ -116,8 +114,7 @@ class ScoresheetViewModel {
                 perfImprovement = 0
             }
             
-            let statObject =  Stat(statId: statsDoc.documentID,
-                                   scoreId: score.scoreId,
+            let statObject =  Stat(scoreId: score.scoreId!,
                                    avgScore: avgScore,
                                    noOfX: simplifiedScores.count {$0 == "X"},
                                    noOf10: simplifiedScores.count {$0 == "10"},
@@ -134,7 +131,8 @@ class ScoresheetViewModel {
                                    avgEndGroupradius: avgGroupRad,
                                    perfScore: perfScore,
                                    perfImprovement: perfImprovement)
-            try statsDoc.setData(from: statObject)
+            
+            try db.collection("Stats").document().setData(from: statObject)
             
         } catch let error {
             throw error
@@ -173,8 +171,9 @@ class ScoresheetViewModel {
     @MainActor
     func submit() async -> Bool {
         do {
+            let db = Firestore.firestore()
+            let scoreDoc = db.collection("Scores").document()
             isLoading = true
-            
             guard validate() else {
                 isLoading = false
                 return false
@@ -184,9 +183,6 @@ class ScoresheetViewModel {
                 isLoading = false
                 return false
             }
-            
-            let db = Firestore.firestore()
-            let scoreDoc = db.collection("Scores").document()
             guard let archerId = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self).archerId else {
                 errorMessage = "Could not retrive Archer record"
                 return false
@@ -212,16 +208,16 @@ class ScoresheetViewModel {
                     if let arrow, arrow.arrowId == arrowDoc.documentID && arrow.endId == endDoc.documentID  {
                         arrowObject = arrow
                     } else if let arrow {
-                        arrowObject = Arrow(arrowId: arrowDoc.documentID, endId: endDoc.documentID, x: arrow.x, y: arrow.y, score: arrow.score)
+                        arrowObject = Arrow(endId: endDoc.documentID, x: arrow.x, y: arrow.y, score: arrow.score)
                     } else {
-                        arrowObject = Arrow(arrowId: arrowDoc.documentID, endId: endDoc.documentID, x: 0, y: 0, score: scores[x][y])
+                        arrowObject = Arrow(endId: endDoc.documentID, x: 0, y: 0, score: scores[x][y])
                     }
                     circlePoints.append((arrowObject.x, arrowObject.y))
                     endTotal += intScore(score: arrowObject.score)
                     try arrowDoc.setData(from: arrowObject)
                 }
                 
-                let endObject = End(endId: endDoc.documentID, scoreId: scoreDoc.documentID, endTotal: endTotal, isVerified: false, imageId: publicId)
+                let endObject = End(scoreId: scoreDoc.documentID, endTotal: endTotal, isVerified: false, imageId: publicId)
                 try endDoc.setData(from: endObject)
                 scoreTotal += endTotal
                 
@@ -234,8 +230,7 @@ class ScoresheetViewModel {
                 groupRadii.append(groupRadius)
             }
             
-            let scoreObject = Score(scoreId: scoreDoc.documentID,
-                                    archerId: archerId,
+            let scoreObject = Score(archerId: archerId,
                                     date: Date.now,
                                     bowType: selectedBow.rawValue,
                                     targetSize: selectedSize.rawValue,

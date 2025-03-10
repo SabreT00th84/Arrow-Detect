@@ -25,7 +25,6 @@ struct ScoresView: View {
         }
         .task {
             self.scores = await viewModel.loadScores()
-            print("task completed")
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("ScoresheetSubmitted"))) { notification in
             Task {@MainActor in
@@ -41,7 +40,7 @@ struct ScoresView: View {
     }
     
     func deleteScores (offsets: IndexSet) {
-        let idsToDelete = offsets.map { scores[$0].scoreId }
+        let idsToDelete = offsets.map {scores[$0].scoreId!}
         Task {
             do {
                 try await viewModel.deleteRecords(scoreIds: idsToDelete)

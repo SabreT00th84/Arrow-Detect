@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Instructor: Codable {
-    let instructorId: String
-    let userId: String
+    @DocumentID var instructorId: String?
+    var userId: String
 }

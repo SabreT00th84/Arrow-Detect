@@ -8,8 +8,27 @@
 import SwiftUI
 
 struct AwardsView: View {
+    
+    @State var viewModel = AwardsViewModel()
+    var twoDPFormat = NumberFormatter()
+    
+    init () {
+        twoDPFormat.numberStyle = .percent
+    }
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        List {
+            ForEach(viewModel.archerAwards, id: \.0.awardId) {(award, awardStatus) in
+                NavigationLink (destination: AwardDetailView(awardTuple: (award, awardStatus))) {
+                    HStack {
+                        Text(award.name)
+                        ProgressView(value: awardStatus.completionRatio)
+                            .progressViewStyle(.linear)
+                        Text(twoDPFormat.string(for: awardStatus.completionRatio) ?? "")
+                    }
+                }
+            }
+        }
     }
 }
 

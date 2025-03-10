@@ -35,10 +35,10 @@ class ScoresViewModel {
                 try await db.collection("Scores").document(id).delete()
                 let endIdsToDelete = try await db.collection("Ends").whereField("scoreId", isEqualTo: id).getDocuments().documents.map {try $0.data(as: End.self).endId}
                 for endId in endIdsToDelete {
-                    try await db.collection("Ends").document(endId).delete()
-                    let arrowIdsToDelete = try await db.collection("Arrows").whereField("endId", isEqualTo: endId).getDocuments().documents.map {try $0.data(as: Arrow.self).arrowId}
+                    try await db.collection("Ends").document(endId!).delete()
+                    let arrowIdsToDelete = try await db.collection("Arrows").whereField("endId", isEqualTo: endId!).getDocuments().documents.map {try $0.data(as: Arrow.self).arrowId}
                     for arrowId in arrowIdsToDelete {
-                        try await db.collection("Arrows").document(arrowId).delete()
+                        try await db.collection("Arrows").document(arrowId!).delete()
                     }
                 }
             }

@@ -11,7 +11,7 @@ import FirebaseAuth
 
 @Observable
 class LeaderboardViewModel {
-    var topScores: [(User?, Score)] = []
+    var topScores: [(User, Score)] = []
     var selectedInterval = 7
     var errorMessage: String?
     
@@ -21,14 +21,13 @@ class LeaderboardViewModel {
         }
     }
     
-    func getUser(archerId: String) async -> User? {
+    func getUser(archerId: String) async throws -> User {
         do {
             let db = Firestore.firestore()
             let archer = try await db.collection("Archers").document(archerId).getDocument(as: Archer.self)
             return try await db.collection("Users").document(archer.userId).getDocument(as: User.self)
         } catch let error {
-            print(error)
-            return nil
+            throw error
         }
     }
     
@@ -49,28 +48,29 @@ class LeaderboardViewModel {
                 errorMessage = "Could not retrieve archer record"
                 return
             }
-            /*guard archer.instructorId != "" else {
+           /* guard archer.instructorId != "" else {
                 errorMessage = "Please join a club before using the leaderboard feature"
                 return
             }*/
             
             let allClubArcherIds = try await db.collection("Archers").whereField("instructorId", isEqualTo: archer.instructorId).getDocuments().documents.map({try $0.data(as: Archer.self).archerId})
-            let scores = try await db.collection("Scores").whereField("archerId", in: allClubArcherIds).whereField("date", isGreaterThan: timeDifference)/*.order(by: "scoreTotal", descending: true)*/.getDocuments().documents.map({try $0.data(as: Score.self)})
+            let scores = try await db.collection("Scores").whereField("archerId", in: allClubArcherIds as [Any]).whereField("date", isGreaterThan: timeDifference).getDocuments().documents.map({try $0.data(as: Score.self)})
             let topArcherIds = Set(scores.map(\.archerId))
-            var tempScores: [(User?, Score)] = []
+            var tempScores: [(User, Score)] = []
             for id in topArcherIds {
                 let archerScores = scores.filter({$0.archerId == id}).sorted {$0.scoreTotal > $1.scoreTotal}
-                print(archerScores)
                 guard let firstScore = archerScores.first else {
                     print( "No scores for archer \(id)")
                     continue
                 }
-                await tempScores.append((getUser(archerId: id), firstScore))
+                try await tempScores.append((getUser(archerId: id), firstScore))
             }
             let sorted = tempScores.sorted(by: {$0.1.scoreTotal > $1.1.scoreTotal})
             topScores = sorted
         } catch let error {
+            print("Error in leaderboard:")
             print(error)
+            print("end error----------")
         }
     }
 }

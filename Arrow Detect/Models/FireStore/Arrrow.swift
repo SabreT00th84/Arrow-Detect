@@ -6,12 +6,13 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Arrow: Codable {
-    let arrowId: String
-    let endId: String
-    let x: Float
-    let y: Float
-    let score: String
+    @DocumentID var arrowId: String?
+    var endId: String
+    var x: Float
+    var y: Float
+    var score: String
     
 }
