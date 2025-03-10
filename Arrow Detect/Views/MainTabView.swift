@@ -17,7 +17,7 @@ struct MainTabView: View {
                 TabView (selection: $viewModel.selection){
                     Tab(value: 0, content: {ScoresView()}, label: {Label("Scores", systemImage: "chart.bar.xaxis")})
                     Tab(value: 1, content: {LeaderboardView()}, label: {Label("Leaderboard", systemImage: "trophy")})
-                    Tab(value: 2, content: {InfoView()}, label: {Label("Info", systemImage: "info.circle")})
+                    Tab(value: 2, content: {AwardsView()}, label: {Label("Awards", systemImage: "medal")})
                     Tab(value: 3, content: {MainSettingsView()}, label: {Label("Settings", systemImage: "gearshape")})
                 }
                 .navigationDestination(isPresented: $viewModel.showScoresheet, destination: {ScoresheetView()})

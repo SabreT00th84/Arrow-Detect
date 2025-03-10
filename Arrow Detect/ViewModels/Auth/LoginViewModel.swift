@@ -28,7 +28,8 @@ class LoginViewModel: ObservableObject {
                 return
             }
             if let error, error.localizedDescription.contains("auth credential is malformed or has expired") {
-                self.noAccount = true
+                errorMessage = "Please check you have an account with us and that your email adress and password is correct"
+                offset = 40
             }
         }
     }

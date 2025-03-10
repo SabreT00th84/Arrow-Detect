@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct Score: Codable, Equatable {
+struct Score: Codable, Equatable, Hashable {
     let scoreId: String
     let archerId: String
     let date: Date

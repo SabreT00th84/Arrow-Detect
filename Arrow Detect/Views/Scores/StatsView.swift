@@ -15,7 +15,8 @@ struct StatsView: View {
     var body: some View {
         let headers = ["End", "Arrow 1", "Arrow 2", "Arrow 3", "End Total"]
         ScrollView(.vertical) {
-            VStack(alignment: .leading) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("**Verified:** \(viewModel.verification)")
                 Text("**Bow type:** \(viewModel.score.bowType)")
                 Text("**Distance:** \(viewModel.score.distance)")
                 Text("**Targt Size:** \(viewModel.score.targetSize)")
@@ -37,9 +38,10 @@ struct StatsView: View {
             }
             Text("Grand Total: \(viewModel.score.scoreTotal)")
                 .font(.headline)
-            Text("Arrow Distibution")
-                .font(.title)
             if let stat = viewModel.stat {
+                Text("**Average Score:** \(String(describing: viewModel.twoDPFormat.string(for: stat.avgScore)))")
+                Text("Arrow Distibution")
+                    .font(.title)
                 Chart {
                     SectorMark(angle: .value("X", stat.noOfX), angularInset: 2)
                         .foregroundStyle(.yellow)
@@ -98,7 +100,7 @@ struct StatsView: View {
                             }
                         }
                     SectorMark(angle: .value("4", stat.noOf4), angularInset: 2)
-                        .foregroundStyle(.gray.opacity(0.2))
+                        .foregroundStyle(.black)
                         .cornerRadius(6)
                         .annotation(position: .overlay) {
                             if stat.noOf4 > 0 {
@@ -106,7 +108,7 @@ struct StatsView: View {
                             }
                         }
                     SectorMark(angle: .value("3", stat.noOf3), angularInset: 2)
-                        .foregroundStyle(.gray.opacity(0.2))
+                        .foregroundStyle(.black)
                         .cornerRadius(6)
                         .annotation(position: .overlay) {
                             if stat.noOf3 > 0 {
@@ -114,7 +116,7 @@ struct StatsView: View {
                             }
                         }
                     SectorMark(angle: .value("2", stat.noOf2), angularInset: 2)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.gray.opacity(0.5))
                         .cornerRadius(6)
                         .annotation(position: .overlay) {
                             if stat.noOf2 > 0 {
@@ -122,25 +124,25 @@ struct StatsView: View {
                             }
                         }
                     SectorMark(angle: .value("1", stat.noOf1), angularInset: 2)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.gray.opacity(0.5))
                         .cornerRadius(6)
                         .annotation(position: .overlay) {
                             if stat.noOf1 > 0 {
                                 Text("1")
-                                    .foregroundStyle(.white)
                             }
                         }
                     SectorMark(angle: .value("M", stat.noOfM), angularInset: 2)
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.gray.opacity(0.5))
                         .cornerRadius(6)
                         .annotation(position: .overlay) {
                             if stat.noOfM > 0 {
                                 Text("M")
-                                    .foregroundStyle(.white)
                             }
                         }
                 }
                 .scaledToFit()
+                Text("**Performance Score:** \(String(describing: viewModel.twoDPFormat.string(for: stat.perfScore)))")
+                Text("**Performance Improvement:** \(String(describing: viewModel.twoDPFormat.string(for: stat.perfImprovement)))")
             }
         }
         .navigationTitle(viewModel.score.date.formatted(date: .numeric, time: .shortened))
