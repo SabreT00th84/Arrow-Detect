@@ -111,7 +111,7 @@ class ScoresheetViewModel {
             }
             
             if let prevScoreId, let prevPerf = try await db.collection("Stats").whereField("scoreId", isEqualTo: prevScoreId).getDocuments().documents.first?.data(as: Stat.self).perfImprovement, prevPerf > 0 {
-                perfImprovement = round((((perfScore - prevPerf)/prevPerf) * 100)*100)/100.0
+                perfImprovement = ((perfScore - prevPerf)/prevPerf) * 100
             } else {
                 perfImprovement = 0
             }

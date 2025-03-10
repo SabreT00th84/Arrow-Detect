@@ -16,9 +16,11 @@ class StatsViewModel {
     var arrows: [[Arrow]] = []
     var tableData: [ScoreTableRow] = []
     var verification = ""
+    @ObservationIgnored var twoDPFormat = NumberFormatter()
     
     init(score: Score) {
         self.score = score
+        twoDPFormat.numberStyle = .decimal
     }
     
     @MainActor
