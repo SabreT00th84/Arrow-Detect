@@ -14,26 +14,56 @@ struct AwardDetailView: View {
     var percentFormat = NumberFormatter()
     
     var body: some View {
-        Group {
-            HStack {
-                ProgressView(value: viewModel.awardTuple.1.completionRatio)
-                    .progressViewStyle(.linear)
-                Text(percentFormat.string(for: viewModel.awardTuple.1.completionRatio * 100) ?? "")
-            }
-            .padding()
-            Text("**Completion:** \(twoDPFormat.string(for: viewModel.awardTuple.1.completionRatio * Float (viewModel.awardTuple.0.noOfRequirements)) ?? "")/\(twoDPFormat.string(for:viewModel.awardTuple.0.noOfRequirements) ?? "")")
-            Text("**Verified:** \(viewModel.verification)")
-            
-            List(viewModel.requirementsTuple, id: \.0.requirementId) {(requirement, status) in
-                HStack {
-                    Button {
-                        viewModel.toggleStatus(tuple: (requirement, status))
-                    }label: {
-                        Image(systemName: status.isCompleted ? "checkmark.circle.fill" : "circle")
-                    }
-                    Text(requirement.description)
+        List {
+            Section {
+                if let qualifyingScore = viewModel.qualifyingScore {
+                    NavigationLink(qualifyingScore.date.formatted(date: .abbreviated, time: .shortened), destination: StatsView(score: qualifyingScore))
+                }else {
+                    Text("No qualifying score")
                 }
+            }header: {
+                VStack (alignment: .leading){
+                    HStack {
+                        ProgressView(value: viewModel.awardTuple.1.completionRatio)
+                            .progressViewStyle(.linear)
+                        Text(percentFormat.string(for: viewModel.awardTuple.1.completionRatio) ?? "")
+                    }
+                    .padding()
+                    Text("**Completion:** \(twoDPFormat.string(for: viewModel.awardTuple.1.completionRatio * Float (viewModel.awardTuple.0.noOfRequirements)) ?? "")/\(twoDPFormat.string(for:viewModel.awardTuple.0.noOfRequirements) ?? "")")
+                    Text("**Verified:** \(viewModel.verification)")
+                    Text("Qualifying Score")
+                        .font(.headline)
+                }
+
             }
+            Section {
+                ForEach (viewModel.requirementsTuple, id: \.0.requirementId) {(requirement, status) in
+                    var isPerformance: Bool {
+                        if requirement.order == -1 {
+                            return true
+                        }else {
+                            return false
+                        }
+                    }
+                    
+                    HStack {
+                        Button {
+                            viewModel.toggleStatus(tuple: (requirement, status))
+                        }label: {
+                            Image(systemName: status.isCompleted ? "checkmark.circle.fill" : "circle")
+                                .foregroundStyle(Color.green)
+                        }
+                        .disabled(isPerformance)
+                        Text(requirement.description)
+                    }
+                }
+            }header: {
+                Text("Requirements")
+                    .font(.headline)
+            }
+        }
+        .task {
+            await viewModel.loadData()
         }
     }
     

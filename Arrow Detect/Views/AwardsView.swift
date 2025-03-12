@@ -29,6 +29,9 @@ struct AwardsView: View {
                 }
             }
         }
+        .task {
+            await viewModel.loadData()
+        }
     }
 }
 
