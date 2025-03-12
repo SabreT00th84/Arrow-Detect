@@ -13,6 +13,7 @@ import FirebaseAuth
 class AwardsViewModel {
     
     var archerAwards: [(Award, AwardStatus)] = []
+    var archer: Archer?
     
     init () {
         Task {
@@ -25,16 +26,17 @@ class AwardsViewModel {
         do {
             let db = Firestore.firestore()
             var awards = try await db.collection("Awards").getDocuments().documents.map {try $0.data(as: Award.self)}
-            awards.sort(by: {$0.awardId! < $1.awardId!})
+            awards.sort(by: {$0.order < $1.order})
             guard let userId = Auth.auth().currentUser?.uid else {
                 print("User not logged in")
                 return
             }
-            let archerId = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self).archerId
-            guard let archerId else {
+            let archer = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self)
+            guard let archer, let archerId = archer.archerId else {
                 print("Could not retrieve archer record")
                 return
             }
+            self.archer = archer
             var awardStatus = try await loadAwardStatus(archerId: archerId)
             if awardStatus.count == 0 {
                 for award in awards {
