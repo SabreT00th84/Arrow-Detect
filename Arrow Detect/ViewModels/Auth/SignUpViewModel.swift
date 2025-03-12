@@ -87,8 +87,9 @@ class SignUpViewModel: ObservableObject {
             do {
                 try db.collection("Users").document(userId).setData(from: newUser)
                 if role == Roles.instructor {
+                    let document = db.collection("Instructors").document()
                     let newInstructor = Instructor(userId: userId)
-                    try db.collection("Instructors").document().setData(from:newInstructor)
+                    try document.setData(from:newInstructor)
                 } else {
                     let newArcher = Archer(userId: userId, instructorId: "")
                     try db.collection("Archers").document().setData(from: newArcher)

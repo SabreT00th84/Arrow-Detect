@@ -19,7 +19,7 @@ struct AwardsView: View {
     var body: some View {
         List {
             ForEach(viewModel.archerAwards, id: \.0.awardId) {(award, awardStatus) in
-                NavigationLink (destination: AwardDetailView(awardTuple: (award, awardStatus))) {
+                NavigationLink (destination: AwardDetailView(awardTuple: (award, awardStatus), archer: viewModel.archer)) {
                     HStack {
                         Text(award.name)
                         ProgressView(value: awardStatus.completionRatio)

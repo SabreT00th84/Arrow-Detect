@@ -25,6 +25,8 @@ class ImageDisplayViewModel {
             return ["": 1.0]
         case .sixty:
             return ["": 2.0]
+        case .forty:
+            return ["": 3.0]
         }
     }
     

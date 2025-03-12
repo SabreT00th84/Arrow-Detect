@@ -29,6 +29,7 @@ class ScoresheetViewModel {
     enum TargetSize: Int {
         case eighty = 80
         case sixty = 60
+        case forty = 40
     }
     
     enum BowType: String {
@@ -230,7 +231,8 @@ class ScoresheetViewModel {
                 groupRadii.append(groupRadius)
             }
             
-            let scoreObject = Score(archerId: archerId,
+            let scoreObject = Score(scoreId: scoreDoc.documentID,
+                                    archerId: archerId,
                                     date: Date.now,
                                     bowType: selectedBow.rawValue,
                                     targetSize: selectedSize.rawValue,
