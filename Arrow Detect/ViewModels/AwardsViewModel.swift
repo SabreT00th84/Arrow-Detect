@@ -15,12 +15,6 @@ class AwardsViewModel {
     var archerAwards: [(Award, AwardStatus)] = []
     var archer: Archer?
     
-    init () {
-        Task {
-            await loadData()
-        }
-    }
-    
     @MainActor
     func loadData() async {
         do {
@@ -37,20 +31,7 @@ class AwardsViewModel {
                 return
             }
             self.archer = archer
-            var awardStatus = try await loadAwardStatus(archerId: archerId)
-            if awardStatus.count == 0 {
-                for award in awards {
-                    let statusObject = AwardStatus(archerId: archerId, awardId: award.awardId!, completionRatio: 0, isVerified: false, dateCompleted: nil)
-                    try db.collection("AwardStatus").document().setData(from: statusObject)
-                    awardStatus.append(statusObject)
-                }
-            }
-            var tempArcherAwards: [(Award, AwardStatus)] = []
-            
-            awardStatus = awardStatus.sorted(by: {$0.awardId < $1.awardId})
-            for (award, awardStatus) in zip(awards, awardStatus) {
-                tempArcherAwards.append((award, awardStatus))
-            }
+            let tempArcherAwards = try await loadAwardStatus(archerId: archerId, awards: awards)
             archerAwards = tempArcherAwards
         } catch let error {
             print("Error in awards:")
@@ -59,11 +40,27 @@ class AwardsViewModel {
         }
     }
     
-    func loadAwardStatus(archerId: String) async throws -> [AwardStatus] {
+    func loadAwardStatus(archerId: String, awards: [Award]) async throws -> [(Award, AwardStatus)] {
         do {
             let db = Firestore.firestore()
-            let status = try await db.collection("Awards").whereField("archerId", isEqualTo: archerId).getDocuments().documents.map {try $0.data(as: AwardStatus.self)}
-            return status
+            var status = try await db.collection("AwardStatus").whereField("archerId", isEqualTo: archerId).getDocuments().documents.map {try $0.data(as: AwardStatus.self)}
+            
+            if status.count == 0 {
+                for award in awards {
+                    let statusObject = AwardStatus(archerId: archerId, awardId: award.awardId!, completionRatio: 0, isVerified: false, dateCompleted: nil)
+                    let result = try db.collection("AwardStatus").addDocument(from: statusObject)
+                    let awardStatus = try await result.getDocument(as: AwardStatus.self)
+                    status.append(awardStatus)
+                }
+            }
+            
+            var tempArcherAwards: [(Award, AwardStatus)] = []
+            for awardStatus in status {
+                let tuple = (awards.first(where: {$0.awardId == awardStatus.awardId})!, awardStatus)
+                tempArcherAwards.append(tuple)
+            }
+            
+            return tempArcherAwards.sorted(by: {$0.0.order < $1.0.order})
         } catch let error {
             throw error
         }
