@@ -8,6 +8,7 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
+import Cloudinary
 
 @Observable
 class LeaderboardViewModel {
@@ -19,6 +20,15 @@ class LeaderboardViewModel {
         Task {
             await loadTopScores(dayInterval: selectedInterval)
         }
+    }
+    
+    func generateImageUrl(user: User) -> String {
+        let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "duy78o4dc", apiKey: "984745322689627", secure: true))
+        guard let url = cloudinary.createUrl().setTransformation(CLDTransformation().setGravity("face").setHeight(40).setWidth(40).setCrop("thumb")).generate(user.imageId) else {
+            print("error occured generating url")
+            return ""
+        }
+        return url
     }
     
     func getUser(archerId: String) async throws -> User {
@@ -40,21 +50,26 @@ class LeaderboardViewModel {
                 return
             }
             
-           guard let userId = Auth.auth().currentUser?.uid else {
-               errorMessage = "Usre is not signed in"
+            guard let userId = Auth.auth().currentUser?.uid else {
+                errorMessage = "User is not signed in"
                 return
             }
             guard let archer = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self) else {
                 errorMessage = "Could not retrieve archer record"
                 return
             }
-           /* guard archer.instructorId != "" else {
-                errorMessage = "Please join a club before using the leaderboard feature"
-                return
-            }*/
+            /* guard archer.instructorId != "" else {
+             errorMessage = "Please join a club before using the leaderboard feature"
+             return
+             }*/
             
             let allClubArcherIds = try await db.collection("Archers").whereField("instructorId", isEqualTo: archer.instructorId).getDocuments().documents.map({try $0.data(as: Archer.self).archerId})
-            let scores = try await db.collection("Scores").whereField("archerId", in: allClubArcherIds as [Any]).whereField("date", isGreaterThan: timeDifference).getDocuments().documents.map({try $0.data(as: Score.self)})
+            var scores: [Score]
+            if dayInterval == 0 {
+                scores = try await db.collection("Scores").whereField("archerId", in: allClubArcherIds as [Any]).getDocuments().documents.map({try $0.data(as: Score.self)})
+            }else {
+                scores = try await db.collection("Scores").whereField("archerId", in: allClubArcherIds as [Any]).whereField("date", isGreaterThan: timeDifference).getDocuments().documents.map({try $0.data(as: Score.self)})
+                }
             let topArcherIds = Set(scores.map(\.archerId))
             var tempScores: [(User, Score)] = []
             for id in topArcherIds {

@@ -9,12 +9,12 @@ import SwiftUI
 
 struct ProfileView: View {
     
-    @StateObject var viewModel = ProfileViewModel()
+    @State var viewModel = ProfileViewModel()
     @State var path = NavigationPath()
     
     var body: some View {
-        ZStack {
-            List {
+        List {
+            Section {
                 NavigationLink (destination: {ProfileEditView(givenUser: viewModel.user)}) {
                     HStack {
                         AsyncImage(url: URL(string: viewModel.imageUrl)) { image in
@@ -32,21 +32,25 @@ struct ProfileView: View {
                     }
                 }
                 .navigationTitle("Profile")
-                //Text("\(Date(timeIntervalSince1970: viewModel.user?.joinDate ?? 0).formatted(date: .numeric, time: .omitted))")
-            }
-            HStack {
-                Button("Reset Password") {
-                    viewModel.logOut()
+                if let instructorId = viewModel.instructor?.instructorId {
+                    Text("**InstructorId:** \(instructorId)")
                 }
-                .tint(Color.orange)
-                Button("Log Out") {viewModel.logOut()}
-                    .tint(Color.red)
+                Text("**Joined:** \(viewModel.user.joinDate.formatted(date: .complete, time: .omitted))")
+            }footer: {
+                HStack {
+                    Spacer()
+                    Button("Reset Password") {viewModel.logOut()}
+                    .tint(Color.orange)
+                    Button("Log Out") {viewModel.logOut()}
+                        .tint(Color.red)
+                    Spacer()
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.large)
+                .padding(.vertical)
             }
-            .buttonStyle(.bordered)
-            .controlSize(.large)
-            .padding(.bottom, 250)
         }
-        .task() {
+        .task {
             await viewModel.loadData()
             viewModel.generateImageUrl()
         }

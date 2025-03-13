@@ -13,15 +13,31 @@ import SwiftUI
 
 struct ProfileEditView: View {
 
-    @StateObject var viewModel: ProfileEditViewModel
+    @State var viewModel: ProfileEditViewModel
     
     var body: some View {
         ZStack {
             Form {
-                Section(footer: Text(viewModel.errorMessage)) {
+                Section {
                     PhotosPicker("Profile Picture", selection: $viewModel.profileItem, matching: .images)
                     TextField("Full Name", text: $viewModel.name)
                     TextField("Email", text: $viewModel.email)
+                }footer: {
+                    VStack (alignment: .leading) {
+                        Text(viewModel.errorMessage)
+                        HStack {
+                            Spacer()
+                            Button("Submit") {
+                                Task {
+                                    await viewModel.submit()
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                            .padding()
+                            Spacer()
+                        }
+                    }
                 }
             }
             .scrollDisabled(true)
@@ -32,12 +48,6 @@ struct ProfileEditView: View {
                 }
             }
             .onAppear {viewModel.loadData()}
-            Button("Submit") {
-                viewModel.submit()
-            }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .padding(.bottom, 100 - CGFloat(viewModel.offset))
             if viewModel.isLoading {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())
@@ -48,7 +58,7 @@ struct ProfileEditView: View {
     
     
     init (givenUser: User) {
-        self._viewModel = StateObject(wrappedValue: ProfileEditViewModel(givenUser: givenUser))
+        viewModel = ProfileEditViewModel(givenUser: givenUser)
     }
 }
 

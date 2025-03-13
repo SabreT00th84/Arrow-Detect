@@ -12,12 +12,12 @@ struct SignUpView: View {
     
     @Binding var path: NavigationPath
     @State var profileItem: PhotosPickerItem?
-    @StateObject var viewModel = SignUpViewModel()
+    @State var viewModel = SignUpViewModel()
     
     var body: some View {
         ZStack {
             Form {
-                Section (footer: Text(viewModel.message)) {
+                Section {
                     PhotosPicker("Profile Picture", selection: $profileItem, matching: .images)
                     TextField("Full Name", text: $viewModel.name)
                         .textInputAutocapitalization(.words)
@@ -29,6 +29,19 @@ struct SignUpView: View {
                         Text("Archer").tag(SignUpViewModel.Roles.archer)
                         Text("Instructor").tag(SignUpViewModel.Roles.instructor)
                     }
+                }footer: {
+                    VStack (alignment: .leading) {
+                        Text(viewModel.message)
+                        HStack {
+                            Spacer()
+                            Button("Submit") {
+                                viewModel.SignUp()
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                            Spacer()
+                        }
+                    }
                 }
             }
             .onChange(of: profileItem) {
@@ -36,15 +49,6 @@ struct SignUpView: View {
                     viewModel.profileImage = try? await profileItem?.loadTransferable(type: Data.self)
                 }
             }
-            VStack {
-                    Button("Submit") {
-                        viewModel.SignUp()
-                    }
-                    .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                Spacer()
-            }
-            .padding(.top, 300 + CGFloat(viewModel.offset))
             if viewModel.isLoading {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())

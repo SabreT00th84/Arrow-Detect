@@ -8,8 +8,21 @@
 import SwiftUI
 
 struct FeaturesView: View {
+    
+    @State private var viewModel = FeaturesViewModel()
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Form {
+            Toggle(isOn: $viewModel.leaderboards, label: {Label("Leaderboards", systemImage: "trophy")})
+            //Toggle(isOn: $viewModel.caching, label: {Label("Local Caching", systemImage: "gauge.with.dots.needle.67percent")})
+        }
+        .navigationTitle("Features")
+        .onChange(of: viewModel.leaderboards) {
+            viewModel.defaults.set(viewModel.leaderboards, forKey: "Leaderboards")
+        }
+        /*.onChange(of: viewModel.caching) {
+            viewModel.defaults.set(viewModel.caching, forKey: "Caching")
+        }*/
     }
 }
 

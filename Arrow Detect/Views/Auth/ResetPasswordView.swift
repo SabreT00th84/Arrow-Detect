@@ -10,26 +10,30 @@ import SwiftUI
 struct ResetPasswordView: View {
     
     @Binding var path: NavigationPath
-    @StateObject var viewModel = ResetPasswordViewModel()
+    @State var viewModel = ResetPasswordViewModel()
     
     var body: some View {
         ZStack {
             Form {
-                Section (footer: Text(viewModel.errorMessage)) {
+                Section {
                     TextField("Email", text: $viewModel.email)
+                }footer: {
+                    VStack {
+                        Text(viewModel.errorMessage)
+                        HStack {
+                            Spacer()
+                            Button("Send Email") {
+                                viewModel.SendEmail()
+                                path.removeLast()
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.large)
+                            Spacer()
+                        }
+                    }
                 }
             }
             .navigationTitle("Reset Password")
-            VStack{
-                Button("Send Email") {
-                    viewModel.SendEmail()
-                    path.removeLast()
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.large)
-                .padding(.top, 80 + CGFloat(viewModel.offset))
-                Spacer()
-            }
         }
     }
 }

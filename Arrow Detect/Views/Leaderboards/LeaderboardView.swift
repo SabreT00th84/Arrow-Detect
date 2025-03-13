@@ -27,7 +27,7 @@ struct LeaderboardView: View {
                 Text("Weekly").tag(7)
                 Text("Monthly").tag(30)
                 Text("Yearly").tag(365)
-                Text("All-Time").tag(99999999)
+                Text("All-Time").tag(0)
             }
             .pickerStyle(.segmented)
             .padding()
@@ -47,6 +47,16 @@ struct LeaderboardView: View {
     var loop: some View {
         ForEach(viewModel.topScores, id: \.0.userId) {(user, score) in
             HStack {
+                Text(String(viewModel.topScores.firstIndex(where: {$0.0.userId == user.userId})! + 1))
+                    .font(.headline)
+                AsyncImage(url: URL(string: viewModel.generateImageUrl(user: user))) { image in
+                    image.resizable()
+                } placeholder : {
+                    Image(systemName: "person.circle")
+                        .resizable()
+                }
+                .frame(width: 40, height: 40)
+                .clipShape(.circle)
                 Text("\(user.name)")
                 Spacer()
                 Text("\(score.scoreTotal)")

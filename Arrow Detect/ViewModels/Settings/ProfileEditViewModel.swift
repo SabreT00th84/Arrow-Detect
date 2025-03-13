@@ -12,15 +12,15 @@ import FirebaseAuth
 import FirebaseFirestore
 import Cloudinary
 
-class ProfileEditViewModel: ObservableObject {
-    @Published var user: User
-    @Published var email = ""
-    @Published var name = ""
-    @Published var errorMessage: String = ""
-    @Published var offset = 0
-    @Published var isLoading = false
-    @Published var profileItem: PhotosPickerItem?
-    @Published var profileImage: Data?
+@Observable
+class ProfileEditViewModel {
+    var user: User
+    var email = ""
+    var name = ""
+    var errorMessage: String = ""
+    var isLoading = false
+    var profileItem: PhotosPickerItem?
+    var profileImage: Data?
     private let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "duy78o4dc", apiKey: "984745322689627", secure: true))
     
     init (givenUser: User) {
@@ -35,21 +35,19 @@ class ProfileEditViewModel: ObservableObject {
     private func Validate () -> Bool {
         guard !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             errorMessage = "Please fill in all fields."
-            offset = 20
             return false
         }
         guard NSPredicate(format: "SELF MATCHES %@", "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}").evaluate(with: email) else {
             errorMessage = "Please enter a valid email."
-            offset = 20
             return false
         }
         return true
     }
     
-    func submit () {
-        guard Validate()  else { return }
-        isLoading = true
-        Task {
+    func submit () async {
+        do {
+            guard Validate()  else { return }
+            isLoading = true
             guard let userID = Auth.auth().currentUser?.uid else { return}
             let db = Firestore.firestore()
             let reference = db.collection("Users").document(userID)
@@ -70,6 +68,8 @@ class ProfileEditViewModel: ObservableObject {
                     return
                 }
             }
+        }catch let error {
+            print(error)
         }
     }
     

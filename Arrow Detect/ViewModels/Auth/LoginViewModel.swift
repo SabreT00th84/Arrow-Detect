@@ -8,14 +8,14 @@
 import Foundation
 import FirebaseAuth
 
-class LoginViewModel: ObservableObject {
-    @Published var email = ""
-    @Published var password = ""
-    @Published var errorMessage = ""
-    @Published var noAccount = false
-    @Published var showSignUp = false
-    @Published var isLoading = false
-    @Published var offset = 0
+@Observable
+class LoginViewModel {
+    var email = ""
+    var password = ""
+    var errorMessage = ""
+    var noAccount = false
+    var showSignUp = false
+    var isLoading = false
     
     func Login () {
         guard Validate() else {
@@ -29,7 +29,6 @@ class LoginViewModel: ObservableObject {
             }
             if let error, error.localizedDescription.contains("auth credential is malformed or has expired") {
                 errorMessage = "Please check you have an account with us and that your email adress and password is correct"
-                offset = 40
             }
         }
     }
@@ -37,12 +36,10 @@ class LoginViewModel: ObservableObject {
     private func Validate () -> Bool {
         guard !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             errorMessage = "Please fill in all fields."
-            offset = 20
             return false
         }
         guard NSPredicate(format: "SELF MATCHES %@", "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}").evaluate(with: email) else {
             errorMessage = "Please enter a valid email."
-            offset = 20
             return false
         }
         return true
