@@ -17,6 +17,7 @@ struct MainTabView: View {
                 TabView (selection: $viewModel.selection){
                     Tab(value: 0, content: {ScoresView()}, label: {Label("Scores", systemImage: "chart.bar.xaxis")})
                     Tab(value: 1, content: {LeaderboardView()}, label: {Label("Leaderboard", systemImage: "trophy")})
+                        .hidden(!UserDefaults.standard.bool(forKey: "Leaderboards"))
                     Tab(value: 2, content: {AwardsView()}, label: {Label("Awards", systemImage: "medal")})
                     Tab(value: 3, content: {MainSettingsView()}, label: {Label("Settings", systemImage: "gearshape")})
                 }

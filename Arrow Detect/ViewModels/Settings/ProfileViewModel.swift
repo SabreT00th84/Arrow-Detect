@@ -10,10 +10,12 @@ import FirebaseFirestore
 import Cloudinary
 import Foundation
 
-class ProfileViewModel: ObservableObject {
+@Observable
+class ProfileViewModel {
 
-    @Published var user = User(userId: "", name: "", email: "", joinDate: Date.now, isInstructor: false, imageId: "")
-    @Published var imageUrl = ""
+    var user = User(userId: "", name: "", email: "", joinDate: Date.now, isInstructor: false, imageId: "")
+    var instructor: Instructor?
+    var imageUrl = ""
     
     func loadData () async {
         guard let userID = Auth.auth().currentUser?.uid else {
@@ -24,6 +26,14 @@ class ProfileViewModel: ObservableObject {
         let db = Firestore.firestore()
         do {
             let snapshot = try await db.collection("Users").document(userID).getDocument()
+            let instructor = try await db.collection("Instructors").document(userID).getDocument()
+            
+            if instructor.exists {
+                try DispatchQueue.main.sync {
+                    self.instructor = try instructor.data(as: Instructor.self)
+                }
+            }
+            
             try DispatchQueue.main.sync {
                 self.user = try snapshot.data(as: User.self)
             }

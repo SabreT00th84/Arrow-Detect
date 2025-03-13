@@ -38,42 +38,42 @@ struct ScoresheetView: View {
                     } header: {
                         Text("End \(endIndex + 1)")
                     } footer: {
-                        Text("Automatic detection is still in development")
-                    }
-                }
-                Section {
-                    HStack {
-                        Spacer()
-                        Button("Submit") {
-                            Task {
-                                let result = await viewModel.submit()
-                                if result {
-                                    dismiss()
+                        VStack(alignment: .leading) {
+                            Text("Automatic detection is still in development")
+                            if endIndex == 4 {
+                                Text(viewModel.errorMessage)
+                                HStack {
+                                    Spacer()
+                                    Button("Submit") {
+                                        Task {
+                                            let result = await viewModel.submit()
+                                            if result {
+                                                dismiss()
+                                            }
+                                        }
+                                    }
+                                    .buttonStyle(.borderedProminent)
+                                    .controlSize(.large)
+                                    Spacer()
                                 }
                             }
                         }
-                        .buttonStyle(.borderedProminent)
-                        .controlSize(.large)
-                        Spacer()
                     }
-                } footer: {
-                    Text(viewModel.errorMessage)
                 }
             }
-            
             if viewModel.isLoading {
                 ProgressView()
                     .progressViewStyle(.circular)
                     .controlSize(.large)
             }
         }
-        .fullScreenCover(isPresented: $viewModel.showCameraView) {
+        /*.fullScreenCover(isPresented: $viewModel.showCameraView) {
             if let image = camera.image {
                 ImageDisplayView(image: image, targetSize: viewModel.selectedSize)
             } else {
                 CameraView(viewModel: $camera)
             }
-        }
+        }*/
     }
     
     @ViewBuilder

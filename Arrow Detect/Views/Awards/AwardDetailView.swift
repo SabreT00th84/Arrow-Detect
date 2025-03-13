@@ -28,7 +28,6 @@ struct AwardDetailView: View {
                             .progressViewStyle(.linear)
                         Text(percentFormat.string(for: viewModel.awardTuple.1.completionRatio) ?? "")
                     }
-                    .padding()
                     Text("**Completion:** \(twoDPFormat.string(for: viewModel.awardTuple.1.completionRatio * Float (viewModel.awardTuple.0.noOfRequirements)) ?? "")/\(twoDPFormat.string(for:viewModel.awardTuple.0.noOfRequirements) ?? "")")
                     Text("**Verified:** \(viewModel.verification)")
                     Text("Qualifying Score")
@@ -65,6 +64,7 @@ struct AwardDetailView: View {
         .task {
             await viewModel.loadData()
         }
+        .navigationTitle(viewModel.awardTuple.0.name)
     }
     
     init (awardTuple: (Award, AwardStatus), archer: Archer?) {

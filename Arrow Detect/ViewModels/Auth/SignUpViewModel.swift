@@ -10,17 +10,17 @@ import FirebaseAuth
 import Foundation
 import PhotosUI
 
-class SignUpViewModel: ObservableObject {
-    @Published var name = ""
-    @Published var email = ""
-    @Published var password = ""
-    @Published var confirm = ""
-    @Published var role = Roles.archer
-    @Published var message = ""
-    @Published var offset = 0
-    @Published var isLoading = false
-    @Published var hasAccount = false
-    @Published var profileImage: Data?
+@Observable
+class SignUpViewModel {
+    var name = ""
+    var email = ""
+    var password = ""
+    var confirm = ""
+    var role = Roles.archer
+    var message = ""
+    var isLoading = false
+    var hasAccount = false
+    var profileImage: Data?
     
     enum Roles {
         case archer, instructor
@@ -28,7 +28,6 @@ class SignUpViewModel: ObservableObject {
     
     func SignUp () {
         guard validate() else {
-            offset = 20
             return
         }
         isLoading = true
@@ -48,7 +47,6 @@ class SignUpViewModel: ObservableObject {
         } catch {
             DispatchQueue.main.sync {
                 self.message = error.localizedDescription
-                self.offset = 40
                 self.isLoading = false
             }
             return nil
@@ -64,7 +62,6 @@ class SignUpViewModel: ObservableObject {
             } catch {
                 DispatchQueue.main.sync {
                     self.message = error.localizedDescription
-                    self.offset = 40
                     self.isLoading = false
                 }
                 return
@@ -97,7 +94,6 @@ class SignUpViewModel: ObservableObject {
                 self.isLoading = false
             } catch {
                 self.message = error.localizedDescription
-                self.offset = 40
                 self.isLoading = false
             }
             return
