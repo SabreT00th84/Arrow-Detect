@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ProfileView: View {
     
+    @AppStorage("Instructor") var isInstructor: Bool?
     @State var viewModel = ProfileViewModel()
     @State var path = NavigationPath()
     
@@ -32,14 +33,15 @@ struct ProfileView: View {
                     }
                 }
                 .navigationTitle("Profile")
-                if let instructorId = viewModel.instructor?.instructorId {
+                if let instructorId = viewModel.instructor?.instructorId, isInstructor ?? false {
                     Text("**InstructorId:** \(instructorId)")
+                        .textSelection(.enabled)
                 }
                 Text("**Joined:** \(viewModel.user.joinDate.formatted(date: .complete, time: .omitted))")
             }footer: {
                 HStack {
                     Spacer()
-                    Button("Reset Password") {viewModel.logOut()}
+                    NavigationLink("Reset Password") {ResetPasswordView()}
                     .tint(Color.orange)
                     Button("Log Out") {viewModel.logOut()}
                         .tint(Color.red)

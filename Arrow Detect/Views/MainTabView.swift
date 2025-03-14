@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct MainTabView: View {
+    
+    @AppStorage("Instructor") var isInstructor: Bool?
+    @AppStorage("Leaderboard") var showLeaderboard: Bool?
     @State var viewModel = MainTabViewModel()
     @State var path = NavigationPath()
     
@@ -16,9 +19,11 @@ struct MainTabView: View {
             NavigationStack (path: $path) {
                 TabView (selection: $viewModel.selection){
                     Tab(value: 0, content: {ScoresView()}, label: {Label("Scores", systemImage: "chart.bar.xaxis")})
+                        .hidden(isInstructor ?? false)
                     Tab(value: 1, content: {LeaderboardView()}, label: {Label("Leaderboard", systemImage: "trophy")})
-                        .hidden(!UserDefaults.standard.bool(forKey: "Leaderboards"))
+                        .hidden(!(showLeaderboard ?? true))
                     Tab(value: 2, content: {AwardsView()}, label: {Label("Awards", systemImage: "medal")})
+                        .hidden(isInstructor ?? false)
                     Tab(value: 3, content: {MainSettingsView()}, label: {Label("Settings", systemImage: "gearshape")})
                 }
                 .navigationDestination(isPresented: $viewModel.showScoresheet, destination: {ScoresheetView()})

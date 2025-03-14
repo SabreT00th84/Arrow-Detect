@@ -9,29 +9,34 @@ import SwiftUI
 
 struct LoginView: View {
     
+    @AppStorage("Instructor") var isInstructor: Bool?
     @State var viewModel = LoginViewModel()
-    @State private var path = NavigationPath()
     
     var body: some View {
-        NavigationStack (path: $path) {
+        NavigationStack {
             ZStack {
                 Form {
                     Section {
                         TextField("Email", text: $viewModel.email)
+                            .textInputAutocapitalization(.never)
+                            .keyboardType(.emailAddress)
                         SecureField("Password", text: $viewModel.password)
                     }footer: {
                         VStack (alignment: .leading){
                             HStack {
                                 Spacer()
-                                NavigationLink("Forgot Password?", destination: ResetPasswordView(path: $path))
+                                NavigationLink("Forgot Password?", destination: ResetPasswordView())
                             }
                             Text(viewModel.errorMessage)
                             HStack {
                                 Spacer()
-                                NavigationLink("Sign Up", destination: SignUpView(path: $path))
+                                NavigationLink("Sign Up", destination: SignUpView())
                                     .buttonStyle(.bordered)
                                 Button("Submit") {
-                                    viewModel.Login()
+                                    Task {
+                                        await viewModel.Login()
+                                        isInstructor = viewModel.isInstructor
+                                    }
                                 }
                                 .buttonStyle(.borderedProminent)
                                 .alert("Sign up?", isPresented: $viewModel.noAccount) {
@@ -55,7 +60,7 @@ struct LoginView: View {
                 }
             }
             .scrollDisabled(true)
-            .navigationDestination(isPresented: $viewModel.showSignUp, destination: {SignUpView(path: $path)})
+            .navigationDestination(isPresented: $viewModel.showSignUp, destination: {SignUpView()})
         }
         
     }

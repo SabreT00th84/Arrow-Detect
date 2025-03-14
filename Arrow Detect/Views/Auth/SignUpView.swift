@@ -10,7 +10,6 @@ import PhotosUI
 
 struct SignUpView: View {
     
-    @Binding var path: NavigationPath
     @State var profileItem: PhotosPickerItem?
     @State var viewModel = SignUpViewModel()
     
@@ -23,6 +22,7 @@ struct SignUpView: View {
                         .textInputAutocapitalization(.words)
                     TextField("Email", text: $viewModel.email)
                         .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
                     SecureField("Password", text: $viewModel.password)
                     SecureField("Confirm", text: $viewModel.confirm)
                     Picker("Role", selection: $viewModel.role) {
@@ -61,5 +61,5 @@ struct SignUpView: View {
 }
 
 #Preview {
-    SignUpView(path: .constant(NavigationPath()))
+    SignUpView()
 }

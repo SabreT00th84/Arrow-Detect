@@ -9,9 +9,12 @@ import Foundation
 import FirebaseFirestore
 import FirebaseAuth
 import Cloudinary
+import SwiftUI
 
 @Observable
 class LeaderboardViewModel {
+    
+    @AppStorage("Instructor") @ObservationIgnored var isinstructor: Bool?
     var topScores: [(User, Score)] = []
     var selectedInterval = 7
     var errorMessage: String?
@@ -54,16 +57,33 @@ class LeaderboardViewModel {
                 errorMessage = "User is not signed in"
                 return
             }
-            guard let archer = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self) else {
-                errorMessage = "Could not retrieve archer record"
-                return
+            var instructorId = ""
+            if let isinstructor, isinstructor {
+                guard let instructor = try await db.collection("Instructors").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Instructor.self) else {
+                    errorMessage = "Could not retrieve instructor record"
+                    return
+                }
+                instructorId = instructor.instructorId!
+            }else {
+                guard let archer = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self) else {
+                    errorMessage = "Could not retrieve archer record"
+                    return
+                }
+                instructorId = archer.instructorId
             }
-            /* guard archer.instructorId != "" else {
+            
+            guard instructorId != "" else {
              errorMessage = "Please join a club before using the leaderboard feature"
              return
-             }*/
+             }
             
-            let allClubArcherIds = try await db.collection("Archers").whereField("instructorId", isEqualTo: archer.instructorId).getDocuments().documents.map({try $0.data(as: Archer.self).archerId})
+            let allClubArcherIds = try await db.collection("Archers").whereField("instructorId", isEqualTo: instructorId).getDocuments().documents.map({try $0.data(as: Archer.self).archerId})
+            
+            guard !allClubArcherIds.isEmpty else {
+                errorMessage = "No Archers in this club"
+                return
+            }
+            
             var scores: [Score]
             if dayInterval == 0 {
                 scores = try await db.collection("Scores").whereField("archerId", in: allClubArcherIds as [Any]).getDocuments().documents.map({try $0.data(as: Score.self)})

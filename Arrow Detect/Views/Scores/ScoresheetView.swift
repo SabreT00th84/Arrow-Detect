@@ -81,6 +81,7 @@ struct ScoresheetView: View {
         HStack {
             ForEach (0..<3) { arrowIndex in
                 TextField("Arrow \(arrowIndex + 1)", text: $viewModel.scores[endIndex][arrowIndex])
+                    .keyboardType(.numbersAndPunctuation)
             }
         }
     }
