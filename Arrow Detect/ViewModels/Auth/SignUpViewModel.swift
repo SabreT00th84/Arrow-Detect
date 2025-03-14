@@ -21,6 +21,7 @@ class SignUpViewModel {
     var isLoading = false
     var hasAccount = false
     var profileImage: Data?
+    var passwordHidden = true
     
     enum Roles {
         case archer, instructor
@@ -43,6 +44,10 @@ class SignUpViewModel {
     private func ceateLoginRecord () async -> AuthDataResult? {
         do {
             let result = try await Auth.auth().createUser(withEmail: email, password: password)
+            let request = Auth.auth().currentUser?.createProfileChangeRequest()
+            request?.displayName = name
+            try await request?.commitChanges()
+            try await Auth.auth().currentUser?.sendEmailVerification()
             return result
         } catch {
             DispatchQueue.main.sync {
@@ -101,7 +106,7 @@ class SignUpViewModel {
     }
     
     private func validate () -> Bool {
-        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+        guard !name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !email.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !password.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, !confirm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             message = "Please fill in all fields"
             return false
         }

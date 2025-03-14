@@ -7,6 +7,7 @@
 
 import Foundation
 import FirebaseAuth
+import FirebaseFirestore
 
 @Observable
 class LoginViewModel {
@@ -16,19 +17,31 @@ class LoginViewModel {
     var noAccount = false
     var showSignUp = false
     var isLoading = false
+    var isInstructor = false
     
-    func Login () {
-        guard Validate() else {
-            return
-        }
-        isLoading = true
-        Auth.auth().signIn(withEmail: email, password: password) { [weak self] result, error in
-            self?.isLoading = false
-            guard let self else {
+    func Login () async {
+        do {
+            guard Validate() else {
+                isLoading = false
                 return
             }
-            if let error, error.localizedDescription.contains("auth credential is malformed or has expired") {
-                errorMessage = "Please check you have an account with us and that your email adress and password is correct"
+            isLoading = true
+            try await Auth.auth().signIn(withEmail: email, password: password)
+            guard let userId = Auth.auth().currentUser?.uid else {
+                errorMessage = "Failed to log in"
+                isLoading = false
+                return
+            }
+            let user = try await Firestore.firestore().collection("Users").document(userId).getDocument(as: User.self)
+            isInstructor = user.isInstructor
+            isLoading = false
+        }catch let error {
+            isLoading = false
+            print(error)
+            if error.localizedDescription.contains("auth credential is malformed or has expired") {
+                errorMessage = "Please check you have an account with us and that your email address and password is correct"
+            }else {
+                errorMessage = error.localizedDescription
             }
         }
     }

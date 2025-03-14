@@ -11,13 +11,22 @@ import Foundation
 @Observable
 class ResetPasswordViewModel {
     var email: String = ""
-    var errorMessage:String = ""
+    var message: String = ""
+    var isLoading = false
     
-    func SendEmail () {
-        guard NSPredicate(format: "SELF MATCHES %@", "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}").evaluate(with: email) else {
-            errorMessage = "Please enter a valid email."
-            return
+    func SendEmail () async {
+        do {
+            isLoading = true
+            guard NSPredicate(format: "SELF MATCHES %@", "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}").evaluate(with: email) else {
+                isLoading = false
+                message = "Please enter a valid email."
+                return
+            }
+            try await Auth.auth().sendPasswordReset(withEmail: email)
+            isLoading = false
+            message = "Success! Please check your emails"
+        }catch let error {
+            print(error)
         }
-        Auth.auth().sendPasswordReset(withEmail: email)
     }
 }

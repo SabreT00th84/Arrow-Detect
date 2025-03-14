@@ -18,17 +18,17 @@ class ProfileViewModel {
     var imageUrl = ""
     
     func loadData () async {
-        guard let userID = Auth.auth().currentUser?.uid else {
+        guard let userId = Auth.auth().currentUser?.uid else {
             print("Could not find current user")
             return
         }
         
         let db = Firestore.firestore()
         do {
-            let snapshot = try await db.collection("Users").document(userID).getDocument()
-            let instructor = try await db.collection("Instructors").document(userID).getDocument()
+            let snapshot = try await db.collection("Users").document(userId).getDocument()
+            let instructor = try await db.collection("Instructors").whereField("userId", isEqualTo: userId).getDocuments().documents.first
             
-            if instructor.exists {
+            if let instructor, instructor.exists {
                 try DispatchQueue.main.sync {
                     self.instructor = try instructor.data(as: Instructor.self)
                 }

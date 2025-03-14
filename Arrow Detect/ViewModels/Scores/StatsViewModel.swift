@@ -38,7 +38,6 @@ class StatsViewModel {
             
             generateTableData()
             verify()
-            print(tableData)
         } catch let error {
             print(error.localizedDescription)
         }
@@ -46,6 +45,7 @@ class StatsViewModel {
     
     @MainActor
     private func generateTableData() {
+        var tempTableData: [ScoreTableRow] = []
         for (i, end) in arrows.enumerated() {
             let endScores = end.map {$0.score}
             let tableRow = ScoreTableRow(endNo: String(i + 1),
@@ -53,8 +53,9 @@ class StatsViewModel {
                           arrow2: endScores[1],
                           arrow3: endScores[2],
                           endTotal: String(ends[i].endTotal))
-            tableData.append(tableRow)
+            tempTableData.append(tableRow)
         }
+        tableData = tempTableData
     }
     
     func verify() {

@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ResetPasswordView: View {
     
-    @Binding var path: NavigationPath
     @State var viewModel = ResetPasswordViewModel()
     
     var body: some View {
@@ -17,14 +16,17 @@ struct ResetPasswordView: View {
             Form {
                 Section {
                     TextField("Email", text: $viewModel.email)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
                 }footer: {
                     VStack {
-                        Text(viewModel.errorMessage)
+                        Text(viewModel.message)
                         HStack {
                             Spacer()
                             Button("Send Email") {
-                                viewModel.SendEmail()
-                                path.removeLast()
+                                Task {
+                                    await viewModel.SendEmail()
+                                }
                             }
                             .buttonStyle(.borderedProminent)
                             .controlSize(.large)
@@ -39,5 +41,5 @@ struct ResetPasswordView: View {
 }
     
 #Preview {
-    ResetPasswordView(path: .constant(NavigationPath()))
+    ResetPasswordView()
 }

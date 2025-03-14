@@ -11,7 +11,19 @@ import Charts
 struct StatsView: View {
     
     @State var viewModel: StatsViewModel
-    var twoDPFormat = NumberFormatter()
+    var twoDPFormat: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        formatter.maximumFractionDigits = 2
+        return formatter
+    }
+    var percentFormat: NumberFormatter {
+        let formatter = NumberFormatter()
+        formatter.minimumFractionDigits = 2
+        formatter.maximumFractionDigits = 2
+        formatter.numberStyle = .percent
+        return formatter
+    }
     
     var body: some View {
         let headers = ["End", "Arrow 1", "Arrow 2", "Arrow 3", "End Total"]
@@ -20,7 +32,7 @@ struct StatsView: View {
                 Text("**Verified:** \(viewModel.verification)")
                 Text("**Bow type:** \(viewModel.score.bowType)")
                 Text("**Distance:** \(viewModel.score.distance)")
-                Text("**Targt Size:** \(viewModel.score.targetSize)")
+                Text("**Target Size:** \(viewModel.score.targetSize)")
             }
             LazyHGrid(rows: [GridItem(.fixed(50), alignment: .center)], spacing: 10) {
                 ForEach(headers, id: \.self) {header in
@@ -143,7 +155,7 @@ struct StatsView: View {
                 }
                 .scaledToFit()
                 Text("**Performance Score:** \(twoDPFormat.string(for: stat.perfScore) ?? "")")
-                Text("**Performance Improvement:** \(twoDPFormat.string(for: stat.perfImprovement) ?? "")")
+                Text("**Performance Improvement:** \(percentFormat.string(for: stat.perfImprovement) ?? "")")
             }
         }
         .navigationTitle(viewModel.score.date.formatted(date: .numeric, time: .shortened))
@@ -153,8 +165,6 @@ struct StatsView: View {
     }
     
     init (score: Score) {
-        twoDPFormat.numberStyle = .decimal
-        twoDPFormat.maximumFractionDigits = 2
         self.viewModel = StatsViewModel(score: score)
     }
 }

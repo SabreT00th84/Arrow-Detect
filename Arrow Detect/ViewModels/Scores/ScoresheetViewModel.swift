@@ -109,8 +109,8 @@ class ScoresheetViewModel {
                 perfScore = Float(score.scoreTotal)
             }
             
-            if let prevScoreId, let prevPerf = try await db.collection("Stats").whereField("scoreId", isEqualTo: prevScoreId).getDocuments().documents.first?.data(as: Stat.self).perfImprovement, prevPerf > 0 {
-                perfImprovement = ((perfScore - prevPerf)/prevPerf) * 100
+            if let prevScoreId, let prevPerf = try await db.collection("Stats").whereField("scoreId", isEqualTo: prevScoreId).getDocuments().documents.first?.data(as: Stat.self).perfScore, prevPerf > 0 {
+                perfImprovement = ((perfScore - prevPerf)/prevPerf)
             } else {
                 perfImprovement = 0
             }
@@ -205,6 +205,10 @@ class ScoresheetViewModel {
                 for (y, arrow) in end.enumerated() {
                     let arrowDoc = db.collection("Arrows").document()
                     let arrowObject: Arrow
+                    
+                    if scores[x][y] == "0" {
+                        scores[x][y] = "M"
+                    }
                     
                     if let arrow, arrow.arrowId == arrowDoc.documentID && arrow.endId == endDoc.documentID  {
                         arrowObject = arrow
