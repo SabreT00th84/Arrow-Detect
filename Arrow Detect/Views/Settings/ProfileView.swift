@@ -9,53 +9,70 @@ import SwiftUI
 
 struct ProfileView: View {
     
-    @AppStorage("Instructor") var isInstructor: Bool?
     @State var viewModel = ProfileViewModel()
     @State var path = NavigationPath()
     
     var body: some View {
-        List {
-            Section {
-                NavigationLink (destination: {ProfileEditView(givenUser: viewModel.user)}) {
-                    HStack {
-                        AsyncImage(url: URL(string: viewModel.imageUrl)) { image in
-                            image.resizable()
-                        } placeholder : {
-                            Image(systemName: "person.circle")
-                                .resizable()
+            List {
+                if let user = viewModel.user {
+                    Section {
+                        NavigationLink (destination: {ProfileEditView(givenUser: user)}) {
+                            HStack {
+                                AsyncImage(url: URL(string: viewModel.imageUrl)) { image in
+                                    image.resizable()
+                                } placeholder : {
+                                    Image(systemName: "person.circle")
+                                        .resizable()
+                                }
+                                .frame(width: 50, height: 50)
+                                .clipShape(.circle)
+                                VStack (alignment: .leading) {
+                                    Text(user.name)
+                                    Text(user.email)
+                                }
+                            }
                         }
-                        .frame(width: 50, height: 50)
-                        .clipShape(.circle)
-                        VStack (alignment: .leading) {
-                            Text(viewModel.user.name)
-                            Text(viewModel.user.email)
+                        .navigationTitle("Profile")
+                        if let instructorId = viewModel.instructor?.instructorId, user.isInstructor {
+                            Text("**InstructorId:** \(instructorId)")
+                                .textSelection(.enabled)
+                        }
+                        Text("**Joined:** \(user.joinDate.formatted(date: .complete, time: .omitted))")
+                    }footer: {
+                        VStack {
+                            HStack {
+                                Spacer()
+                                NavigationLink("Reset Password") {ResetPasswordView()}
+                                    .tint(Color.orange)
+                                Button("Log Out") {viewModel.logOut()}
+                                    .tint(Color.red)
+                                Spacer()
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.large)
+                            .padding(.vertical)
+                            Button("Delete Account") {viewModel.showDeletionAlert = true}
+                                .tint(Color.red)
+                        }
+                        .alert("Delete account?", isPresented: $viewModel.showDeletionAlert) {
+                            Button("Yes", role: .destructive) {
+                                Task {
+                                    await viewModel.deleteAccount()
+                                }
+                            }
+                        }message: {
+                            Text("Are you sure you want to delete your account? This is irreversable and will delete all data associated with the account permanently.")
                         }
                     }
+                }else {
+                    ProgressView()
+                        .progressViewStyle(.circular)
                 }
-                .navigationTitle("Profile")
-                if let instructorId = viewModel.instructor?.instructorId, isInstructor ?? false {
-                    Text("**InstructorId:** \(instructorId)")
-                        .textSelection(.enabled)
-                }
-                Text("**Joined:** \(viewModel.user.joinDate.formatted(date: .complete, time: .omitted))")
-            }footer: {
-                HStack {
-                    Spacer()
-                    NavigationLink("Reset Password") {ResetPasswordView()}
-                    .tint(Color.orange)
-                    Button("Log Out") {viewModel.logOut()}
-                        .tint(Color.red)
-                    Spacer()
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
-                .padding(.vertical)
             }
-        }
-        .task {
-            await viewModel.loadData()
-            viewModel.generateImageUrl()
-        }
+            .task {
+                await viewModel.loadData()
+                viewModel.generateImageUrl()
+            }
     }
 }
 

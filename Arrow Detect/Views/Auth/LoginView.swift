@@ -41,7 +41,7 @@ struct LoginView: View {
                                 .buttonStyle(.borderedProminent)
                                 .alert("Sign up?", isPresented: $viewModel.noAccount) {
                                     Button("No") {}
-                                    Button("Yes", role: .cancel, action: {viewModel.showSignUp = true})
+                                    Button("Yes", role: .cancel) {viewModel.showSignUp = true}
                                 } message: {
                                     Text("You do not seem to have an account with arrow detect. would you like to sign up?")
                                 }
