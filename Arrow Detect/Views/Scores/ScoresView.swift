@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct ScoresView: View {
-    @Environment(MainTabViewModel.self) var tabViewModel
     @State private var viewModel = ScoresViewModel()
     @State private var scores: [Score] = []
     
