@@ -35,6 +35,17 @@ struct ProfileEditView: View {
                             .buttonStyle(.borderedProminent)
                             .controlSize(.large)
                             .padding()
+                            .alert("Change Email", isPresented: $viewModel.showEmailChangeAlert) {
+                                SecureField("Password", text: $viewModel.password)
+                                Button("Submit") {
+                                    Task {
+                                        await viewModel.chnageEmail()
+                                        viewModel.isLoading = false
+                                    }
+                                }
+                            }message: {
+                                Text("You must re-enter your password to change your email")
+                            }
                             Spacer()
                         }
                     }
@@ -47,7 +58,6 @@ struct ProfileEditView: View {
                     viewModel.profileImage = try? await viewModel.profileItem?.loadTransferable(type: Data.self)
                 }
             }
-            .onAppear {viewModel.loadData()}
             if viewModel.isLoading {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())

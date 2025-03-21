@@ -17,17 +17,16 @@ class ProfileEditViewModel {
     var user: User
     var email = ""
     var name = ""
+    var password = ""
     var errorMessage: String = ""
     var isLoading = false
     var profileItem: PhotosPickerItem?
     var profileImage: Data?
+    var showEmailChangeAlert = false
     private let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "duy78o4dc", apiKey: "984745322689627", secure: true))
     
     init (givenUser: User) {
         self.user = givenUser
-    }
-    
-    func loadData () {
         email = user.email
         name = user.name
     }
@@ -48,11 +47,11 @@ class ProfileEditViewModel {
         do {
             guard Validate()  else { return }
             isLoading = true
-            guard let userID = Auth.auth().currentUser?.uid else { return}
+            guard let authUser = Auth.auth().currentUser else { return}
             let db = Firestore.firestore()
-            let reference = db.collection("Users").document(userID)
+            let reference = db.collection("Users").document(authUser.uid)
             if email != user.email {
-                try await Auth.auth().currentUser?.sendEmailVerification(beforeUpdatingEmail: email)
+                showEmailChangeAlert = true
             }
             if name != user.name {
                 try await reference.updateData(["name": name])
@@ -61,7 +60,7 @@ class ProfileEditViewModel {
             if profileImage != nil {
                 do {
                     let publicId = try await uploadImage(image: UIImage(data: profileImage!)!)
-                    try await reference.updateData(["publicId": publicId])
+                    try await reference.updateData(["imageId": publicId])
                 } catch let error {
                     print("error uploading new public Id to database")
                     print(error)
@@ -70,6 +69,20 @@ class ProfileEditViewModel {
             }
         }catch let error {
             print(error)
+        }
+    }
+    
+    func chnageEmail () async {
+        do {
+            let db = Firestore.firestore()
+            let credential = EmailAuthProvider.credential(withEmail: user.email, password: password)
+            try await Auth.auth().currentUser?.reauthenticate(with: credential)
+            errorMessage = "Please check your inbox for a verification email."
+            try await Auth.auth().currentUser?.sendEmailVerification(beforeUpdatingEmail: email)
+            try await db.collection("Users").document(user.userId!).updateData(["email": email])
+        }catch let error {
+            print(error)
+            errorMessage = error.localizedDescription
         }
     }
     
@@ -119,11 +132,13 @@ class ProfileEditViewModel {
     }
     
     private func deleteImage(publicId: String, folder: String, signature: String, timestamp: Int) async throws {
-        throw try await withCheckedThrowingContinuation { continuation in
-            let params = CLDDestroyRequestParams().setSignature(CLDSignature(signature: signature, timestamp: NSNumber(value: timestamp)))
+        return try await withCheckedThrowingContinuation { continuation in
+            let params = CLDDestroyRequestParams().setSignature(CLDSignature(signature: signature, timestamp: NSNumber(value: timestamp))).setInvalidate(true)
             cloudinary.createManagementApi().destroy(publicId, params: params, completionHandler: { result, error in
                 if let error {
                     continuation.resume(throwing: error)
+                }else {
+                    continuation.resume()
                 }
             })
         }
