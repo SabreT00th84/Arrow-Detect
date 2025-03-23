@@ -24,9 +24,9 @@ class ResetPasswordViewModel {
             }
             try await Auth.auth().sendPasswordReset(withEmail: email)
             isLoading = false
-            message = "Success! Please check your emails"
+            message = "An email has been sent to your email address if you have an account with us. Please check your inbox."
         }catch let error {
-            print(error)
+            message = error.localizedDescription
         }
     }
 }
