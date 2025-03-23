@@ -26,6 +26,7 @@ struct LoginView: View {
                             HStack {
                                 Spacer()
                                 NavigationLink("Forgot Password?", destination: ResetPasswordView())
+                                    .padding(.top, 2)
                             }
                             Text(viewModel.errorMessage)
                             HStack {
