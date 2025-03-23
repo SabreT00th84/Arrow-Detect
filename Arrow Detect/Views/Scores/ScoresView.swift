@@ -9,45 +9,30 @@ import SwiftUI
 
 struct ScoresView: View {
     @State private var viewModel = ScoresViewModel()
-    @State private var scores: [Score] = []
     
     var body: some View {
         List {
-            ForEach(scores, id: \.scoreId) { score in
+            ForEach(viewModel.scores, id: \.scoreId) { score in
                 NavigationLink {
                     StatsView(score: score)
                 } label: {
                     Text(score.date.formatted(date: .abbreviated, time: .shortened))
                 }
             }
-            .onDelete(perform: deleteScores)
+            .onDelete(perform: viewModel.deleteScores)
         }
         .task {
-            self.scores = await viewModel.loadScores()
+            await viewModel.loadScores()
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("ScoresheetSubmitted"))) { notification in
             Task {@MainActor in
                 if let object = notification.userInfo?["record"] as? Score {
                     withAnimation {
-                        self.scores.append(object)
+                        viewModel.scores.append(object)
                     }
-                } else {
-                    self.scores = await viewModel.loadScores()
+                }else {
+                    await viewModel.loadScores()
                 }
-            }
-        }
-    }
-    
-    func deleteScores (offsets: IndexSet) {
-        let idsToDelete = offsets.map {scores[$0].scoreId!}
-        Task {
-            do {
-                try await viewModel.deleteRecords(scoreIds: idsToDelete)
-                await MainActor.run {
-                    scores.remove(atOffsets: offsets)
-                }
-            } catch let error {
-                print(error.localizedDescription)
             }
         }
     }

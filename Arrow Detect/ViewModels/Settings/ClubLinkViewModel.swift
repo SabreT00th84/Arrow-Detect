@@ -12,9 +12,48 @@ import FirebaseFirestore
 @Observable
 class ClubLinkViewModel {
     var instructorId = ""
+    var archer: Archer?
+    var insUser: User?
     var errorMessage: String?
     var isLoading = false
     var success = false
+    
+    @MainActor
+    func loadData () async {
+        do {
+            guard let user = Auth.auth().currentUser else {
+                print("user not logged in")
+                return
+            }
+            
+            let db = Firestore.firestore()
+            archer = try await db.collection("Archers").whereField("userId", isEqualTo: user.uid).getDocuments().documents.first?.data(as: Archer.self)
+            
+            guard archer?.instructorId != "" else { //Added to make sure the document path is never empty
+                print("No club linked")
+                return
+            }
+            
+            let insUserId = try await db.collection("Instructors").document(archer!.instructorId).getDocument(as: Instructor.self).userId
+            insUser = try await db.collection("Users").document(insUserId).getDocument(as: User.self)
+        }catch let error {
+            errorMessage = error.localizedDescription
+        }
+    }
+    
+    func unlink () async {
+        do {
+            guard var newArcher = archer else {
+                print("archer not found")
+                return
+            }
+            let db = Firestore.firestore()
+            newArcher.instructorId = ""
+            try db.collection("Archers").document(newArcher.archerId!).setData(from: newArcher, merge: true)
+        }catch let error {
+            print(error.localizedDescription)
+        }
+    }
     
     private func validate () async -> Bool {
         do {

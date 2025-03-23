@@ -12,19 +12,22 @@ import FirebaseAuth
 @Observable
 class ScoresViewModel {
     
+    var scores: [Score] = []
+    
     @MainActor
-    func loadScores () async -> [Score] {
+    func loadScores () async {
         do {
             let db = Firestore.firestore()
             guard let userId  = Auth.auth().currentUser?.uid, let archerId = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self).archerId else {
                 print("User not logged in")
-                return []
+                return
             }
             let documents = try await db.collection("Scores").whereField("archerId", isEqualTo: archerId).order(by: "date", descending: true).getDocuments().documents
-            return try documents.map {try $0.data(as: Score.self)}
+            let array = try documents.map {try $0.data(as: Score.self)}
+            scores = array
         } catch let error {
             print(error.localizedDescription)
-            return []
+            return
         }
     }
     
@@ -44,6 +47,20 @@ class ScoresViewModel {
             }
         } catch let error {
             throw error
+        }
+    }
+    
+    func deleteScores (offsets: IndexSet) {
+        let idsToDelete = offsets.map {scores[$0].scoreId!}
+        Task {
+            do {
+                try await deleteRecords(scoreIds: idsToDelete)
+                await MainActor.run {
+                    scores.remove(atOffsets: offsets)
+                }
+            } catch let error {
+                print(error.localizedDescription)
+            }
         }
     }
 }
