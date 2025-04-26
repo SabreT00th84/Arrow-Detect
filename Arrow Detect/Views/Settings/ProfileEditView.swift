@@ -30,6 +30,7 @@ struct ProfileEditView: View {
                             Button("Submit") {
                                 Task {
                                     await viewModel.submit()
+                                    viewModel.isLoading = false
                                 }
                             }
                             .buttonStyle(.borderedProminent)
@@ -44,7 +45,7 @@ struct ProfileEditView: View {
                                     }
                                 }
                             }message: {
-                                Text("You must re-enter your password to change your email")
+                                Text("You must re-enter your password to change your email. Changing your email will automatically sign you out.")
                             }
                             Spacer()
                         }

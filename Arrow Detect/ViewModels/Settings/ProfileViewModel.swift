@@ -17,6 +17,7 @@ class ProfileViewModel {
     var instructor: Instructor?
     var showDeletionAlert = false
     var imageUrl = ""
+    var password = ""
     
     func loadData () async {
         guard let userId = Auth.auth().currentUser?.uid else {
@@ -51,13 +52,13 @@ class ProfileViewModel {
         }
     }
     
-    func deleteAccount () async {
+    private func deleteAccount () async throws {
         do {
             guard let user else {
                 print("User has not been initialised")
                 return
             }
-            
+
             let db = Firestore.firestore()
             if let instructor {
                 let clubArchers = try await db.collection("Archers").whereField("instructorId", isEqualTo: instructor.instructorId!).getDocuments().documents.map {try $0.data(as: Archer.self)}
@@ -115,6 +116,20 @@ class ProfileViewModel {
             
             try await Auth.auth().currentUser?.delete()
             
+        }catch let error {
+            throw error
+        }
+    }
+    
+    func reathenticateBeforeDeletion() async {
+        do {
+            guard let user else {
+                print("User not initialised")
+                return
+            }
+            let credential = EmailAuthProvider.credential(withEmail: user.email, password: password)
+            try await Auth.auth().currentUser?.reauthenticate(with: credential)
+            try await deleteAccount()
         }catch let error {
             print(error)
         }

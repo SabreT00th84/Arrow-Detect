@@ -14,7 +14,7 @@ class StatsViewModel {
     var stat: Stat?
     var ends: [End] = []
     var arrows: [[Arrow]] = []
-    var tableData: [ScoreTableRow] = []
+    var tableData: [[String]] = []
     var verification = ""
     
     init(score: Score) {
@@ -45,14 +45,14 @@ class StatsViewModel {
     
     @MainActor
     private func generateTableData() {
-        var tempTableData: [ScoreTableRow] = []
+        var tempTableData: [[String]] = []
         for (i, end) in arrows.enumerated() {
             let endScores = end.map {$0.score}
-            let tableRow = ScoreTableRow(endNo: String(i + 1),
-                          arrow1: endScores[0],
-                          arrow2: endScores[1],
-                          arrow3: endScores[2],
-                          endTotal: String(ends[i].endTotal))
+            let tableRow = [String(i + 1),
+                          endScores[0],
+                          endScores[1],
+                          endScores[2],
+                          String(ends[i].endTotal)]
             tempTableData.append(tableRow)
         }
         tableData = tempTableData

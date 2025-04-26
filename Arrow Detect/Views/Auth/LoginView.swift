@@ -9,7 +9,6 @@ import SwiftUI
 
 struct LoginView: View {
     
-    @AppStorage("Instructor") var isInstructor: Bool?
     @State var viewModel = LoginViewModel()
     
     var body: some View {
@@ -36,7 +35,7 @@ struct LoginView: View {
                                 Button("Submit") {
                                     Task {
                                         await viewModel.Login()
-                                        isInstructor = viewModel.isInstructor
+                                        viewModel.isLoading = false
                                     }
                                 }
                                 .buttonStyle(.borderedProminent)
@@ -63,7 +62,6 @@ struct LoginView: View {
             .scrollDisabled(true)
             .navigationDestination(isPresented: $viewModel.showSignUp, destination: {SignUpView()})
         }
-        
     }
 }
 #Preview {

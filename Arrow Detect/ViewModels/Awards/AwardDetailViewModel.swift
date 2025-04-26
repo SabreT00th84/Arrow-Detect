@@ -70,9 +70,8 @@ class AwardDetailViewModel {
             requirementsTuple = tupleArray
             try await loadQualifyingScore()
             
-            if let qualifyingScore, let tuple = requirementsTuple.first, !tuple.1.isCompleted {
+            if qualifyingScore != nil, let tuple = requirementsTuple.first, !tuple.1.isCompleted {
                 toggleStatus(tuple: tuple)
-                updateCompletion()
             }
             
         }catch let error {

@@ -15,7 +15,7 @@ struct Arrow_DetectApp: App {
 
     var body: some Scene {
         WindowGroup {
-            if authTest.isSignedIn {
+            if authTest.isSignedInAndVerified {
                 MainTabView()
             } else {
                 LoginView()

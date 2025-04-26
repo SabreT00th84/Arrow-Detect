@@ -36,9 +36,12 @@ struct LeaderboardView: View {
                 loop
             }
         }
+        .task {
+            await viewModel.loadTopScores()
+        }
         .onChange(of: viewModel.selectedInterval) {
             Task {
-                await viewModel.loadTopScores(dayInterval: viewModel.selectedInterval)
+                await viewModel.loadTopScores()
             }
         }
     }

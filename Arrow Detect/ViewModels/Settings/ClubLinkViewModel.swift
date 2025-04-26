@@ -29,12 +29,12 @@ class ClubLinkViewModel {
             let db = Firestore.firestore()
             archer = try await db.collection("Archers").whereField("userId", isEqualTo: user.uid).getDocuments().documents.first?.data(as: Archer.self)
             
-            guard archer?.instructorId != "" else { //Added to make sure the document path is never empty
+            guard let archer, archer.instructorId != "" else { //Added to make sure the document path is never empty
                 print("No club linked")
                 return
             }
             
-            let insUserId = try await db.collection("Instructors").document(archer!.instructorId).getDocument(as: Instructor.self).userId
+            let insUserId = try await db.collection("Instructors").document(archer.instructorId).getDocument(as: Instructor.self).userId
             insUser = try await db.collection("Users").document(insUserId).getDocument(as: User.self)
         }catch let error {
             errorMessage = error.localizedDescription
@@ -78,28 +78,21 @@ class ClubLinkViewModel {
     func submit () async {
         do {
             isLoading = true
-            guard await validate() else {
-                isLoading = false
-                return
-            }
+            guard await validate() else {return}
             guard let userId = Auth.auth().currentUser?.uid else {
                 errorMessage = "User id not logged in"
-                isLoading = false
                 return
             }
             let db = Firestore.firestore()
             guard let archer = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self) else {
                 errorMessage = "Could not retrieve archer record"
-                isLoading = false
                 return
             }
             let updatedArcher = Archer(userId: userId, instructorId: instructorId)
             try db.collection("Archers").document(archer.archerId!).setData(from: updatedArcher, merge: true)
-            isLoading = false
             success = true
         }catch let error {
             errorMessage = error.localizedDescription
-            isLoading = false
             return
         }
     }

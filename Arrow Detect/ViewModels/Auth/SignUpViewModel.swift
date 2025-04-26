@@ -9,6 +9,7 @@ import FirebaseFirestore
 import FirebaseAuth
 import Foundation
 import PhotosUI
+import SwiftUI
 
 @Observable
 class SignUpViewModel {
@@ -22,22 +23,18 @@ class SignUpViewModel {
     var hasAccount = false
     var profileImage: Data?
     var passwordHidden = true
+    @AppStorage("Instructor") @ObservationIgnored var isInstructor: Bool?
     
     enum Roles {
         case archer, instructor
     }
     
-    func SignUp () {
+    func SignUp () async {
         guard validate() else {
             return
         }
         isLoading = true
-        DispatchQueue.main.async {
-            Task {
-                await self.createUserRecord()
-            }
-            return
-        }
+        await self.createUserRecord()
     }
     
     
@@ -48,11 +45,11 @@ class SignUpViewModel {
             request?.displayName = name
             try await request?.commitChanges()
             try await Auth.auth().currentUser?.sendEmailVerification()
+            message = "Please verify your email address. A verification email has been sent to your inbox."
             return result
         } catch {
             DispatchQueue.main.sync {
                 self.message = error.localizedDescription
-                self.isLoading = false
             }
             return nil
         }
@@ -67,39 +64,31 @@ class SignUpViewModel {
             } catch {
                 DispatchQueue.main.sync {
                     self.message = error.localizedDescription
-                    self.isLoading = false
                 }
                 return
             }
         } else {
              publicId = ""
         }
-        guard let result = await ceateLoginRecord() else {
-            DispatchQueue.main.sync {
-                self.isLoading = false
-            }
-            return
-        }
-        
+        guard let result = await ceateLoginRecord() else {return}
         let userId = result.user.uid
-        
         let newUser = User(name: name, email: email, joinDate: Date.now, isInstructor: role == Roles.instructor, imageId: publicId)
         let db = Firestore.firestore()
         DispatchQueue.main.sync {
             do {
                 try db.collection("Users").document(userId).setData(from: newUser)
                 if role == Roles.instructor {
+                    isInstructor =  true
                     let document = db.collection("Instructors").document()
                     let newInstructor = Instructor(userId: userId)
                     try document.setData(from:newInstructor)
                 } else {
+                    isInstructor = false
                     let newArcher = Archer(userId: userId, instructorId: "")
                     try db.collection("Archers").document().setData(from: newArcher)
                 }
-                self.isLoading = false
             } catch {
                 self.message = error.localizedDescription
-                self.isLoading = false
             }
             return
         }

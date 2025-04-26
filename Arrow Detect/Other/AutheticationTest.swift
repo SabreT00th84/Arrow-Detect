@@ -10,33 +10,26 @@ import FirebaseFirestore
 import Foundation
 
 class AuthenticationTest: ObservableObject {
-    @Published var currentUserId = ""
-    //@Published var documentExists = false
+    @Published var currentUser: FirebaseAuth.User?
     private var handler: AuthStateDidChangeListenerHandle?
-    //private var listener: ListenerRegistration?
     
     init () {
         self.handler = Auth.auth().addStateDidChangeListener { [weak self] _, user in
             DispatchQueue.main.async {
-                self?.currentUserId = user?.uid ?? ""
+                self?.currentUser = user
             }
         }
     }
     
-    public var isSignedIn: Bool {
+    public var isSignedInAndVerified: Bool {
         guard let user = Auth.auth().currentUser else { return false }
         user.reload { _ in }
-        return Auth.auth().currentUser != nil
-    }
-    
-    /*func checkDocument () {
-        guard isSignedIn == true else { return}
-        let reference = Firestore.firestore().collection("Users").document(currentUserId)
-        reference.addSnapshotListener { [weak self] snapshot, error in
-            guard let snapshot, let self else { return}
-            DispatchQueue.main.async {
-                self.documentExists = snapshot.exists
-            }
+        let isSignedIn = Auth.auth().currentUser != nil
+        let isVerified = Auth.auth().currentUser?.isEmailVerified ?? false
+        if isSignedIn && isVerified {
+            return true
+        } else {
+            return false
         }
-    }*/
+    }
 }
