@@ -13,7 +13,6 @@ import simd
 
 @Observable
 class ScoresheetViewModel {
-    var archer = Archer(archerId: "", userId: "", instructorId: "")
     var arrows: [[Arrow?]] = Array(repeating: Array(repeating: nil, count: 3), count: 5)
     var scores: [[String]] = Array(repeating: Array(repeating: "", count: 3), count: 5)
     var images: [CIImage?] = Array(repeating: nil, count: 5)
@@ -45,24 +44,6 @@ class ScoresheetViewModel {
         case thirty = 30
     }
     
-    @MainActor
-    func loadData() async {
-        guard let userID = Auth.auth().currentUser?.uid else {
-            print("Could not find current user")
-            return
-        }
-        
-        let db = Firestore.firestore()
-        
-        do {
-            let snapshot = try await db.collection("Archers").document(userID).getDocument()
-            self.archer = try snapshot.data(as: Archer.self)
-        } catch let error {
-            print(error.localizedDescription)
-            return
-        }
-    }
-    
     private func uploadImage (image: UIImage) async throws -> String {
         guard let data = image.pngData() else {
             throw DecodingError.dataCorrupted(DecodingError.Context(codingPath: [], debugDescription: "Could not convert image to data"))
@@ -92,7 +73,7 @@ class ScoresheetViewModel {
             return Int(score) ?? -1
         }
     }
-    
+   
     func createStatsRecord (score: Score, prevScoreId: String?, groupRadii: [Float]) async throws {
         do {
             let db = Firestore.firestore()
@@ -140,17 +121,19 @@ class ScoresheetViewModel {
         }
     }
     
+    //This function aims to calculate the arrow grouping from an array of 3 points representing the position of arrow tips on the target.
     func calculateGroupRadius (points: [(Float, Float)]) -> Float {
-        guard points.count >= 3 else {
-            errorMessage = "Not enough points to calculate group radius"
-            return 0
+        
+        guard points.count == 3 else { //Ensures that the array contains 3 points.
+            errorMessage = "3 points are required to calculate the radius" //Updates the error message variable which will be displayed to the user.
+            return 0 //Returns 0 if the radius could not be calculated.
         }
         
-        let pointsMatrix = simd_float3x3(rows: points.prefix(3).map {simd_float3(2 * $0.0, 2 * $0.1, 1)})
-        let squaredMatrix = simd_float3(points.prefix(3).map {-(pow($0.0, 2) + pow($0.1, 2))})
-        let solution = pointsMatrix.inverse * squaredMatrix
+        let pointsMatrix = simd_float3x3(rows: points.prefix(3).map {simd_float3(2 * $0.0, 2 * $0.1, 1)}) //Creates a circle from the 3 points using matrices.
+        let squaredMatrix = simd_float3(points.prefix(3).map {-(pow($0.0, 2) + pow($0.1, 2))}) //Intemediary step solving matrices.
+        let solution = pointsMatrix.inverse * squaredMatrix //Solves the matrices and stores an object  the circle centre's x coordinate , y coordinate and a constant.
         
-        return sqrt(pow(solution.x, 2) + pow(solution.y, 2) - solution.z)
+        return sqrt(pow(solution.x, 2) + pow(solution.y, 2) - solution.z) //Calculates the radius from the values in the object using a known maths equation.
     }
     
     func validate() -> Bool {
@@ -173,21 +156,20 @@ class ScoresheetViewModel {
     func submit() async -> Bool {
         do {
             let db = Firestore.firestore()
-            let scoreDoc = db.collection("Scores").document()
             isLoading = true
             guard validate() else {
-                isLoading = false
                 return false
             }
             guard let userId = Auth.auth().currentUser?.uid else {
                 errorMessage = "User is not logged in"
-                isLoading = false
                 return false
             }
             guard let archerId = try await db.collection("Archers").whereField("userId", isEqualTo: userId).getDocuments().documents.first?.data(as: Archer.self).archerId else {
                 errorMessage = "Could not retrive Archer record"
                 return false
             }
+            
+            let scoreDoc = db.collection("Scores").document()
             var scoreTotal = 0
             var groupRadii: [Float] = []
             
@@ -247,11 +229,9 @@ class ScoresheetViewModel {
             let prevScore = try await db.collection("Scores").whereField("date", isLessThan: scoreObject.date).order(by: "date").getDocuments().documents.first?.data(as: Score.self)
             try await createStatsRecord(score: scoreObject, prevScoreId: prevScore?.scoreId, groupRadii: groupRadii)
             NotificationCenter.default.post(name: Notification.Name("ScoresheetSubmitted"), object: nil, userInfo: ["record": scoreObject])
-            isLoading = false
             return true
         } catch let error {
             errorMessage = error.localizedDescription
-            isLoading = false
             print(error)
             return false
         }

@@ -53,15 +53,16 @@ struct ProfileView: View {
                             .padding(.vertical)
                             Button("Delete Account") {viewModel.showDeletionAlert = true}
                                 .tint(Color.red)
-                        }
-                        .alert("Delete account?", isPresented: $viewModel.showDeletionAlert) {
-                            Button("Yes", role: .destructive) {
-                                Task {
-                                    await viewModel.deleteAccount()
+                                .alert("Delete account?", isPresented: $viewModel.showDeletionAlert) {
+                                    SecureField("Password", text: $viewModel.password)
+                                    Button("Yes", role: .destructive) {
+                                        Task {
+                                            await viewModel.reathenticateBeforeDeletion()
+                                        }
+                                    }
+                                }message: {
+                                    Text("Are you sure you want to delete your account? This is irreversible and will delete all data associated with the account permanently.\n\nPlease enter your password to continue.")
                                 }
-                            }
-                        }message: {
-                            Text("Are you sure you want to delete your account? This is irreversable and will delete all data associated with the account permanently.")
                         }
                     }
                 }else {

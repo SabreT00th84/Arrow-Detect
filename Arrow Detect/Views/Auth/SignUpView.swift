@@ -35,7 +35,10 @@ struct SignUpView: View {
                         HStack {
                             Spacer()
                             Button("Submit") {
-                                viewModel.SignUp()
+                                Task {
+                                    await viewModel.SignUp()
+                                    viewModel.isLoading = false
+                                }
                             }
                             .buttonStyle(.borderedProminent)
                             .controlSize(.large)
@@ -49,6 +52,7 @@ struct SignUpView: View {
                     viewModel.profileImage = try? await profileItem?.loadTransferable(type: Data.self)
                 }
             }
+            
             if viewModel.isLoading {
                 ProgressView()
                     .progressViewStyle(CircularProgressViewStyle())

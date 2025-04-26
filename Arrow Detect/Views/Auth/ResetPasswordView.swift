@@ -26,6 +26,7 @@ struct ResetPasswordView: View {
                             Button("Send Email") {
                                 Task {
                                     await viewModel.SendEmail()
+                                    viewModel.isLoading = false
                                 }
                             }
                             .buttonStyle(.borderedProminent)

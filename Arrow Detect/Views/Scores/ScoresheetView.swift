@@ -20,10 +20,12 @@ struct ScoresheetView: View {
                     Text("80cm").tag(ScoresheetViewModel.TargetSize.eighty)
                     Text("60cm").tag(ScoresheetViewModel.TargetSize.sixty)
                 }
+                
                 Picker("Bow Type", selection: $viewModel.selectedBow) {
                     Text("Barebow").tag(ScoresheetViewModel.BowType.barebow)
                     Text("Recurve").tag(ScoresheetViewModel.BowType.recurve)
                 }
+                
                 Picker("Distance", selection: $viewModel.selectedDistance) {
                     Text("10m").tag(ScoresheetViewModel.Distance.ten)
                     Text("14m").tag(ScoresheetViewModel.Distance.fourteen)
@@ -31,6 +33,7 @@ struct ScoresheetView: View {
                     Text("25m").tag(ScoresheetViewModel.Distance.twentyFive)
                     Text("30m").tag(ScoresheetViewModel.Distance.thirty)
                 }
+                
                 ForEach (0..<5) { endIndex in
                     Section {
                         arrowsView(endIndex: endIndex)
@@ -47,6 +50,7 @@ struct ScoresheetView: View {
                                     Button("Submit") {
                                         Task {
                                             let result = await viewModel.submit()
+                                            viewModel.isLoading = false
                                             if result {
                                                 dismiss()
                                             }
@@ -61,6 +65,7 @@ struct ScoresheetView: View {
                     }
                 }
             }
+            
             if viewModel.isLoading {
                 ProgressView()
                     .progressViewStyle(.circular)

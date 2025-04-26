@@ -34,9 +34,7 @@ class AwardsViewModel {
             let tempArcherAwards = try await loadAwardStatus(archerId: archerId, awards: awards)
             archerAwards = tempArcherAwards
         } catch let error {
-            print("Error in awards:")
             print(error)
-            print("end error ---------")
         }
     }
     
@@ -45,7 +43,7 @@ class AwardsViewModel {
             let db = Firestore.firestore()
             var status = try await db.collection("AwardStatus").whereField("archerId", isEqualTo: archerId).getDocuments().documents.map {try $0.data(as: AwardStatus.self)}
             
-            if status.count == 0 {
+            if status.isEmpty {
                 for award in awards {
                     let statusObject = AwardStatus(archerId: archerId, awardId: award.awardId!, completionRatio: 0, isVerified: false, dateCompleted: nil)
                     let result = try db.collection("AwardStatus").addDocument(from: statusObject)

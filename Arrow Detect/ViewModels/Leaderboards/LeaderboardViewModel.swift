@@ -19,12 +19,6 @@ class LeaderboardViewModel {
     var selectedInterval = 7
     var errorMessage: String?
     
-    init () {
-        Task {
-            await loadTopScores(dayInterval: selectedInterval)
-        }
-    }
-    
     func generateImageUrl(user: User) -> String {
         let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "duy78o4dc", apiKey: "984745322689627", secure: true))
         guard let url = cloudinary.createUrl().setTransformation(CLDTransformation().setGravity("face").setHeight(40).setWidth(40).setCrop("thumb")).generate(user.imageId) else {
@@ -44,11 +38,11 @@ class LeaderboardViewModel {
         }
     }
     
-    func loadTopScores(dayInterval: Int) async {
+    func loadTopScores() async {
         do {
             let db = Firestore.firestore()
             
-            guard let timeDifference = Calendar.current.date(byAdding: .day, value: -dayInterval, to: .now) else {
+            guard let timeDifference = Calendar.current.date(byAdding: .day, value: -selectedInterval, to: .now) else {
                 errorMessage = "Could not calculate time difference"
                 return
             }
@@ -85,7 +79,7 @@ class LeaderboardViewModel {
             }
             
             var scores: [Score]
-            if dayInterval == 0 {
+            if selectedInterval == 0 {
                 scores = try await db.collection("Scores").whereField("archerId", in: allClubArcherIds as [Any]).getDocuments().documents.map({try $0.data(as: Score.self)})
             }else {
                 scores = try await db.collection("Scores").whereField("archerId", in: allClubArcherIds as [Any]).whereField("date", isGreaterThan: timeDifference).getDocuments().documents.map({try $0.data(as: Score.self)})
@@ -103,9 +97,7 @@ class LeaderboardViewModel {
             let sorted = tempScores.sorted(by: {$0.1.scoreTotal > $1.1.scoreTotal})
             topScores = sorted
         } catch let error {
-            print("Error in leaderboard:")
             print(error)
-            print("end error----------")
         }
     }
 }

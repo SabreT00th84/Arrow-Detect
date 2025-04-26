@@ -27,6 +27,7 @@ struct StatsView: View {
     
     var body: some View {
         let headers = ["End", "Arrow 1", "Arrow 2", "Arrow 3", "End Total"]
+        let columns = Array(repeating: GridItem(.flexible(), alignment: .center), count: 5)
         ScrollView(.vertical) {
             VStack(alignment: .leading, spacing: 8) {
                 Text("**Verified:** \(viewModel.verification)")
@@ -34,19 +35,21 @@ struct StatsView: View {
                 Text("**Distance:** \(viewModel.score.distance)")
                 Text("**Target Size:** \(viewModel.score.targetSize)")
             }
-            LazyHGrid(rows: [GridItem(.fixed(50), alignment: .center)], spacing: 10) {
-                ForEach(headers, id: \.self) {header in
-                        Text(header)
-                        .font(.headline)
+            LazyVGrid(columns: columns, spacing: 5) {
+                Group {
+                    Text(headers[0])
+                    Text(headers[1])
+                    Text(headers[2])
+                    Text(headers[3])
+                    Text(headers[4])
                 }
-            }
-            ForEach(viewModel.tableData) {row in
-                LazyHGrid(rows: [GridItem(.fixed(10))], spacing: 60) {
-                    Text(row.endNo)
-                    Text(row.arrow1)
-                    Text(row.arrow2)
-                    Text(row.arrow3)
-                    Text(row.endTotal)
+                .font(.headline)
+                ForEach(viewModel.tableData, id: \.first) {row in
+                    Text(row[0])
+                    Text(row[1])
+                    Text(row[2])
+                    Text(row[3])
+                    Text(row[4])
                 }
             }
             Text("Grand Total: \(viewModel.score.scoreTotal)")
@@ -153,6 +156,7 @@ struct StatsView: View {
                             }
                         }
                 }
+                .padding()
                 .scaledToFit()
                 Text("**Performance Score:** \(twoDPFormat.string(for: stat.perfScore) ?? "")")
                 Text("**Performance Improvement:** \(percentFormat.string(for: stat.perfImprovement) ?? "")")

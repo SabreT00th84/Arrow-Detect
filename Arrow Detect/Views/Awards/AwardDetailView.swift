@@ -61,10 +61,10 @@ struct AwardDetailView: View {
                     .font(.headline)
             }
         }
+        .navigationTitle(viewModel.awardTuple.0.name)
         .task {
             await viewModel.loadData()
         }
-        .navigationTitle(viewModel.awardTuple.0.name)
     }
     
     init (awardTuple: (Award, AwardStatus), archer: Archer?) {

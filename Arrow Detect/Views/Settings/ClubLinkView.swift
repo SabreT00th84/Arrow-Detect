@@ -18,7 +18,8 @@ struct ClubLinkView: View {
                     Text("Instructor Details:")
                         .font(.headline)
                     Text("**Name:** \(instructor.name)")
-                    Text("**ID: \(archer.instructorId)")
+                    Text("**ID:** \(archer.instructorId)")
+                        .textSelection(.enabled)
                     Button("Unlink") {
                         Task {
                             await viewModel.unlink()
@@ -44,6 +45,7 @@ struct ClubLinkView: View {
                                     Button("Submit") {
                                         Task {
                                             await viewModel.submit()
+                                            viewModel.isLoading = false 
                                         }
                                     }
                                     .buttonStyle(.borderedProminent)

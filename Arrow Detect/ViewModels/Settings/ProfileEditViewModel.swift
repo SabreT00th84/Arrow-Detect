@@ -23,6 +23,7 @@ class ProfileEditViewModel {
     var profileItem: PhotosPickerItem?
     var profileImage: Data?
     var showEmailChangeAlert = false
+    var hasChanged = false
     private let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "duy78o4dc", apiKey: "984745322689627", secure: true))
     
     init (givenUser: User) {
@@ -54,18 +55,23 @@ class ProfileEditViewModel {
                 showEmailChangeAlert = true
             }
             if name != user.name {
-                try await reference.updateData(["name": name])
+                user.name = name
+                hasChanged = true
             }
             
             if profileImage != nil {
                 do {
                     let publicId = try await uploadImage(image: UIImage(data: profileImage!)!)
-                    try await reference.updateData(["imageId": publicId])
+                    user.imageId = publicId
+                    hasChanged = true
                 } catch let error {
                     print("error uploading new public Id to database")
                     print(error)
-                    return
                 }
+            }
+            
+            if hasChanged {
+                try reference.setData(from: user, merge: true)
             }
         }catch let error {
             print(error)
@@ -74,12 +80,18 @@ class ProfileEditViewModel {
     
     func chnageEmail () async {
         do {
-            let db = Firestore.firestore()
             let credential = EmailAuthProvider.credential(withEmail: user.email, password: password)
             try await Auth.auth().currentUser?.reauthenticate(with: credential)
             errorMessage = "Please check your inbox for a verification email."
             try await Auth.auth().currentUser?.sendEmailVerification(beforeUpdatingEmail: email)
-            try await db.collection("Users").document(user.userId!).updateData(["email": email])
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                do {
+                    try Auth.auth().signOut()
+                }catch {
+                    fatalError("Couldn't log out")
+                }
+            }
         }catch let error {
             print(error)
             errorMessage = error.localizedDescription
