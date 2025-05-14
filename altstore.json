@@ -18,6 +18,13 @@
             "localizedDescription": " ",
             "iconURL": "https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/tags/v1.0.0-rc.1/Arrow%20Detect/Other/Assets.xcassets/AppIcon.appiconset/IMG_0336.png",
             "tintColor": "#5CA399",
+            "screenshots": [
+                https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0121.png, 
+                https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0119.png,
+                https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0122.jpeg,
+                https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0123.png,
+                https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0124.png
+            ],
             "versions": [
                 {
                     "version": "1.0",
