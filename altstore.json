@@ -1,0 +1,49 @@
+{
+    "name": "Arrow Detect",
+    "subtitle": "Arrow Detect apps",
+    "description": " ",
+    "iconURL": "https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/tags/v1.0.0-rc.1/Arrow%20Detect/Other/Assets.xcassets/AppIcon.appiconset/IMG_0336.png",
+    "headerURL": "https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/tags/v1.0.0-rc.1/Arrow%20Detect/Other/Assets.xcassets/AppIcon.appiconset/IMG_0336.png",
+    "website": "https://github.com/SabreT00th84/Arrow-Detect/releases",
+    "tintColor": "#4185A9",
+    "featuredApps": [
+        "com.arrow-detect.ios"
+    ],
+    "apps": [
+        {
+            "name": "Arrow Detect",
+            "bundleIdentifier": "com.arrow-detect.ios",
+            "developerName": "Eesa Adam",
+            "subtitle": "App to help arhcers score digitally.",
+            "localizedDescription": " ",
+            "iconURL": "https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/tags/v1.0.0-rc.1/Arrow%20Detect/Other/Assets.xcassets/AppIcon.appiconset/IMG_0336.png",
+            "tintColor": "#5CA399",
+            "screenshots": [
+                "https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0121.png", 
+                "https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0119.png",
+                "https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0122.jpeg",
+                "https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0123.png",
+                "https://raw.githubusercontent.com/SabreT00th84/Arrow-Detect/refs/heads/main/Screenshots/IMG_0124.png"
+            ],
+            "versions": [
+                {
+                    "version": "1.0",
+                    "date": "2025-05-12",
+                    "size": 5030000,
+                    "downloadURL": "https://github.com/SabreT00th84/Arrow-Detect/releases/download/v1.0.0-rc.1/Arrow-Detect.ipa",
+                    "localizedDescription": "New features and bug fixes.",
+                    "minOSVersion": "18.0"
+                }
+            ],
+            "appPermissions": {
+                "entitlements": [
+                "get-task-allow"
+                ],
+                "privacy": {
+                    "NSCameraUsageDescription": "The camera is required to take pictures of archery targets."
+                }
+            }
+        }
+    ],
+    "news": []
+}
