@@ -15,7 +15,12 @@ struct LeaderboardView: View {
         if let error = viewModel.errorMessage {
             Text(error)
                 .font(.callout)
-        }else {
+                .padding()
+                .multilineTextAlignment(.center)
+                .onDisappear {
+                    viewModel.errorMessage = nil
+                }
+        } else {
             main
         }
     }

@@ -17,6 +17,7 @@ class ClubLinkViewModel {
     var errorMessage: String?
     var isLoading = false
     var success = false
+    var clubLinked: Bool?
     
     @MainActor
     func loadData () async {
@@ -30,12 +31,14 @@ class ClubLinkViewModel {
             archer = try await db.collection("Archers").whereField("userId", isEqualTo: user.uid).getDocuments().documents.first?.data(as: Archer.self)
             
             guard let archer, archer.instructorId != "" else { //Added to make sure the document path is never empty
+                clubLinked = false
                 print("No club linked")
                 return
             }
             
             let insUserId = try await db.collection("Instructors").document(archer.instructorId).getDocument(as: Instructor.self).userId
             insUser = try await db.collection("Users").document(insUserId).getDocument(as: User.self)
+            clubLinked = true
         }catch let error {
             errorMessage = error.localizedDescription
         }
@@ -49,7 +52,9 @@ class ClubLinkViewModel {
             }
             let db = Firestore.firestore()
             newArcher.instructorId = ""
+            instructorId = ""
             try db.collection("Archers").document(newArcher.archerId!).setData(from: newArcher, merge: true)
+            
         }catch let error {
             print(error.localizedDescription)
         }
