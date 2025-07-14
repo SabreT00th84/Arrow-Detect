@@ -21,7 +21,7 @@ class LeaderboardViewModel {
     
     func generateImageUrl(user: User) -> String {
         let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "duy78o4dc", apiKey: "984745322689627", secure: true))
-        guard let url = cloudinary.createUrl().setTransformation(CLDTransformation().setGravity("face").setHeight(40).setWidth(40).setCrop("thumb")).generate(user.imageId) else {
+        guard let url = cloudinary.createUrl().setTransformation(CLDTransformation().setGravity("face").setHeight(100).setWidth(100).setCrop("thumb")).generate(user.imageId) else {
             print("error occured generating url")
             return ""
         }

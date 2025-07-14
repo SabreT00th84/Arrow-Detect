@@ -204,7 +204,7 @@ class ScoresheetViewModel {
                     try arrowDoc.setData(from: arrowObject)
                 }
                 
-                let endObject = End(scoreId: scoreDoc.documentID, endTotal: endTotal, isVerified: false, imageId: publicId)
+                let endObject = End(scoreId: scoreDoc.documentID, endNo: x, endTotal: endTotal, isVerified: false, imageId: publicId)
                 try endDoc.setData(from: endObject)
                 scoreTotal += endTotal
                 
