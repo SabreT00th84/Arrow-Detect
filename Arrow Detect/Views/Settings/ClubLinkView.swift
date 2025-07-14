@@ -10,22 +10,30 @@ import SwiftUI
 struct ClubLinkView: View {
     
     @State private var viewModel = ClubLinkViewModel()
+    @Environment(\.dismiss) var dismiss
     
     var body: some View {
         Group {
-            if let instructor = viewModel.insUser, let archer = viewModel.archer {
+            if let clubLinked = viewModel.clubLinked, clubLinked == true {
                 VStack {
-                    Text("Instructor Details:")
-                        .font(.headline)
-                    Text("**Name:** \(instructor.name)")
-                    Text("**ID:** \(archer.instructorId)")
+                    Text("Instructor Details")
+                        .font(.title.bold())
+                    Text("**Name:** \(viewModel.insUser?.name ?? "")")
+                    Text("**ID:** \(viewModel.archer?.instructorId ?? "")")
                         .textSelection(.enabled)
                     Button("Unlink") {
                         Task {
                             await viewModel.unlink()
+                            dismiss()
                         }
                     }
                     .tint(Color.red)
+                    .padding()
+                }
+                .onAppear {
+                    Task {
+                        await viewModel.loadData()
+                    }
                 }
             }else {
                 ZStack {
@@ -52,8 +60,10 @@ struct ClubLinkView: View {
                                     .controlSize(.large)
                                     .padding()
                                     .alert("Success", isPresented: $viewModel.success) {
-                                        Button("OK") {}
-                                    }message: {
+                                        Button("OK") {
+                                            dismiss()
+                                        }
+                                    } message: {
                                         Text("You have now been added to the club")
                                     }
                                     Spacer()
