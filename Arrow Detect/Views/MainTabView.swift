@@ -11,6 +11,7 @@ struct MainTabView: View {
     
     @AppStorage("Instructor") var isInstructor: Bool?
     @AppStorage("Leaderboard") var showLeaderboard: Bool?
+    
     @State var viewModel = MainTabViewModel()
     @State var path = NavigationPath()
     
