@@ -19,6 +19,8 @@ struct ScoresheetView: View {
                 Picker("Target Size", selection: $viewModel.selectedSize) {
                     Text("80cm").tag(ScoresheetViewModel.TargetSize.eighty)
                     Text("60cm").tag(ScoresheetViewModel.TargetSize.sixty)
+                    Text("40cm")
+                        .tag(ScoresheetViewModel.TargetSize.forty)
                 }
                 
                 Picker("Bow Type", selection: $viewModel.selectedBow) {

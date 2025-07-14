@@ -23,7 +23,6 @@ class ProfileEditViewModel {
     var profileItem: PhotosPickerItem?
     var profileImage: Data?
     var showEmailChangeAlert = false
-    var hasChanged = false
     private let cloudinary = CLDCloudinary(configuration: CLDConfiguration(cloudName: "duy78o4dc", apiKey: "984745322689627", secure: true))
     
     init (givenUser: User) {
@@ -51,12 +50,15 @@ class ProfileEditViewModel {
             guard let authUser = Auth.auth().currentUser else { return}
             let db = Firestore.firestore()
             let reference = db.collection("Users").document(authUser.uid)
+            var hasChanged = false
+            var nameChanged = false
             if email != user.email {
                 showEmailChangeAlert = true
             }
             if name != user.name {
                 user.name = name
                 hasChanged = true
+                nameChanged = true
             }
             
             if profileImage != nil {
@@ -73,7 +75,14 @@ class ProfileEditViewModel {
             if hasChanged {
                 try reference.setData(from: user, merge: true)
             }
-        }catch let error {
+            
+            if nameChanged {
+                let request = Auth.auth().currentUser?.createProfileChangeRequest()
+                request?.displayName = name
+                try await request?.commitChanges()
+            }
+            
+        } catch let error {
             print(error)
         }
     }
