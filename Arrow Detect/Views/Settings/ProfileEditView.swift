@@ -38,6 +38,7 @@ struct ProfileEditView: View {
                             .padding()
                             .alert("Change Email", isPresented: $viewModel.showEmailChangeAlert) {
                                 SecureField("Password", text: $viewModel.password)
+                                Button("Cancel", role: .cancel) {}
                                 Button("Submit") {
                                     Task {
                                         await viewModel.chnageEmail()
