@@ -32,8 +32,8 @@ struct StatsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("**Verified:** \(viewModel.verification)")
                 Text("**Bow type:** \(viewModel.score.bowType)")
-                Text("**Distance:** \(viewModel.score.distance)")
-                Text("**Target Size:** \(viewModel.score.targetSize)")
+                Text("**Distance:** \(viewModel.score.distance)m")
+                Text("**Target Size:** \(viewModel.score.targetSize)cm")
             }
             LazyVGrid(columns: columns, spacing: 5) {
                 Group {
@@ -121,6 +121,7 @@ struct StatsView: View {
                         .annotation(position: .overlay) {
                             if stat.noOf4 > 0 {
                                 Text("4")
+                                    .colorInvert()
                             }
                         }
                     SectorMark(angle: .value("3", stat.noOf3), angularInset: 2)
@@ -129,6 +130,7 @@ struct StatsView: View {
                         .annotation(position: .overlay) {
                             if stat.noOf3 > 0 {
                                 Text("3")
+                                    .colorInvert()
                             }
                         }
                     SectorMark(angle: .value("2", stat.noOf2), angularInset: 2)

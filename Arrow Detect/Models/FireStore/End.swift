@@ -11,6 +11,7 @@ import FirebaseFirestore
 struct End: Codable {
     @DocumentID var endId: String?
     var scoreId: String
+    var endNo: Int
     var endTotal: Int
     var isVerified: Bool
     var imageId: String

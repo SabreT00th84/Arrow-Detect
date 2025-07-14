@@ -25,7 +25,7 @@ class StatsViewModel {
     func loadData() async {
         do {
             let db = Firestore.firestore()
-            ends = try await db.collection("Ends").whereField("scoreId", isEqualTo: score.scoreId!).getDocuments().documents.map({try $0.data(as: End.self)})
+            ends = try await db.collection("Ends").whereField("scoreId", isEqualTo: score.scoreId!).getDocuments().documents.map({try $0.data(as: End.self)}).sorted(by: {$0.endNo < $1.endNo})
             stat = try await db.collection("Stats").whereField("scoreId", isEqualTo: score.scoreId!).getDocuments().documents.first?.data(as: Stat.self)
             
             var tempArrows: [[Arrow]] = []
